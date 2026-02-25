@@ -5,7 +5,10 @@
   const DEFAULT_PROFILE = {
     fullName: "",
     email: "",
+    phone: "",
+    linkedin: "",
     address: "",
+    whyJoin: "",
     updatedAt: null
   };
 
@@ -42,7 +45,10 @@
     return {
       fullName: typeof p.fullName === "string" ? p.fullName : "",
       email: typeof p.email === "string" ? p.email : "",
+      phone: typeof p.phone === "string" ? p.phone : "",
+      linkedin: typeof p.linkedin === "string" ? p.linkedin : "",
       address: typeof p.address === "string" ? p.address : "",
+      whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -63,12 +69,32 @@
     const fullName = /** @type {any} */ (byId("fullName"));
     /** @type {HTMLInputElement} */
     const email = /** @type {any} */ (byId("email"));
+    /** @type {HTMLInputElement} */
+    const phone = /** @type {any} */ (byId("phone"));
+    /** @type {HTMLInputElement} */
+    const linkedin = /** @type {any} */ (byId("linkedin"));
     /** @type {HTMLTextAreaElement} */
     const address = /** @type {any} */ (byId("address"));
+    /** @type {HTMLTextAreaElement} */
+    const whyJoin = /** @type {any} */ (byId("whyJoin"));
 
     fullName.value = profile.fullName;
     email.value = profile.email;
+    phone.value = profile.phone;
+    linkedin.value = profile.linkedin;
     address.value = profile.address;
+    whyJoin.value = profile.whyJoin;
+  }
+
+  function isProbablyUrl(url) {
+    const u = String(url).trim();
+    if (!u) return true;
+    try {
+      const parsed = new URL(u);
+      return parsed.protocol === "https:" || parsed.protocol === "http:";
+    } catch {
+      return false;
+    }
   }
 
   async function saveProfileFromForm() {
@@ -76,19 +102,34 @@
     const fullNameEl = /** @type {any} */ (byId("fullName"));
     /** @type {HTMLInputElement} */
     const emailEl = /** @type {any} */ (byId("email"));
+    /** @type {HTMLInputElement} */
+    const phoneEl = /** @type {any} */ (byId("phone"));
+    /** @type {HTMLInputElement} */
+    const linkedinEl = /** @type {any} */ (byId("linkedin"));
     /** @type {HTMLTextAreaElement} */
     const addressEl = /** @type {any} */ (byId("address"));
+    /** @type {HTMLTextAreaElement} */
+    const whyJoinEl = /** @type {any} */ (byId("whyJoin"));
 
     const profile = {
       fullName: fullNameEl.value.trim(),
       email: emailEl.value.trim(),
+      phone: phoneEl.value.trim(),
+      linkedin: linkedinEl.value.trim(),
       address: addressEl.value.trim(),
+      whyJoin: whyJoinEl.value.trim(),
       updatedAt: Date.now()
     };
 
     if (!isProbablyEmail(profile.email)) {
       setStatus("That email doesn't look valid.", { isError: true, persistMs: 2400 });
       emailEl.focus();
+      return;
+    }
+
+    if (!isProbablyUrl(profile.linkedin)) {
+      setStatus("That LinkedIn URL doesn't look valid.", { isError: true, persistMs: 2400 });
+      linkedinEl.focus();
       return;
     }
 

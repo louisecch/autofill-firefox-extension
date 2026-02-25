@@ -52,6 +52,39 @@
           </div>
 
           <div class="field">
+            <label for="phone">Phone</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              placeholder="e.g. +852 9123 4567"
+              autocomplete="tel"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Targets fields like <code>phone</code>, <code>mobile</code>,
+              <code>telephone</code>, <code>tel</code>.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="linkedin">LinkedIn</label>
+            <input
+              id="linkedin"
+              name="linkedin"
+              type="url"
+              inputmode="url"
+              placeholder="e.g. https://www.linkedin.com/in/your-handle"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Only fills fields that explicitly mention <code>linkedin</code>.
+            </p>
+          </div>
+
+          <div class="field">
             <label for="address">Address</label>
             <textarea
               id="address"
@@ -64,6 +97,23 @@
             <p class="help subtle">
               Targets fields like <code>address</code>, <code>street</code>,
               <code>address1</code>, and <code>streetAddress</code>.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="whyJoin">Why would you like to join &lt;company name&gt;?</label>
+            <textarea
+              id="whyJoin"
+              name="whyJoin"
+              rows="6"
+              placeholder="Example: I’m excited to join &lt;company name&gt; because…"
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <p class="help subtle">
+              This will autofill “why join/why this company” questions. Use the
+              literal text <code>&lt;company name&gt;</code> in your answer and
+              the extension will try to replace it automatically.
             </p>
           </div>
 

@@ -5,13 +5,25 @@
   const DEFAULT_PROFILE = {
     fullName: "",
     email: "",
+    phone: "",
+    linkedin: "",
     address: "",
+    whyJoin: "",
     updatedAt: null
   };
 
   const EMAIL_RE =
     /\b(e-?mail|email\s*address|emailaddress|contact\s*email|primary\s*email)\b/i;
   const EMAIL_NEG_RE = /\b(newsletter|subscribe|subscription)\b/i;
+
+  const PHONE_RE = /\b(phone|mobile|cell|telephone|tel|contact\s*(no|num|number)|whatsapp)\b/i;
+  const PHONE_NEG_RE = /\b(extension\s*(id|identifier)|telnet)\b/i;
+
+  const LINKEDIN_RE = /\b(linked\s*in|linkedin)\b/i;
+
+  const WHY_JOIN_RE =
+    /\b(why\s+(would|do)\s+you\s+(want|like)\s+to\s+(join|work(\s+at|\s+for)?)|why\s+(this|our)\s+company|why\s+are\s+you\s+interested\s+in)\b/i;
+  const WHY_JOIN_NEG_RE = /\b(why\s+did\s+you\s+leave|reason\s+for\s+leaving|gap|quit)\b/i;
 
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
   const FIRST_AND_LAST_RE =
@@ -36,7 +48,10 @@
     return {
       fullName: typeof p.fullName === "string" ? p.fullName : "",
       email: typeof p.email === "string" ? p.email : "",
+      phone: typeof p.phone === "string" ? p.phone : "",
+      linkedin: typeof p.linkedin === "string" ? p.linkedin : "",
       address: typeof p.address === "string" ? p.address : "",
+      whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -46,8 +61,43 @@
     return Boolean(
       String(profile.fullName || "").trim() ||
         String(profile.email || "").trim() ||
-        String(profile.address || "").trim()
+        String(profile.phone || "").trim() ||
+        String(profile.linkedin || "").trim() ||
+        String(profile.address || "").trim() ||
+        String(profile.whyJoin || "").trim()
     );
+  }
+
+  function inferCompanyNameFromSignal(signal) {
+    const s = String(signal || "").replace(/\s+/g, " ").trim();
+    if (!s) return "";
+
+    // e.g. "Why would you like to join Acme?" → "Acme"
+    const m =
+      s.match(/\bjoin\s+([A-Za-z0-9][A-Za-z0-9&.,'’\-]*(?:\s+[A-Za-z0-9][A-Za-z0-9&.,'’\-]*){0,5})\b/i) ||
+      s.match(/\bwork\s+(?:at|for)\s+([A-Za-z0-9][A-Za-z0-9&.,'’\-]*(?:\s+[A-Za-z0-9][A-Za-z0-9&.,'’\-]*){0,5})\b/i) ||
+      null;
+    if (!m) return "";
+
+    const candidate = String(m[1] || "")
+      .trim()
+      .replace(/[?!.:,;]+$/g, "")
+      .trim();
+    if (!candidate) return "";
+
+    // Avoid obvious non-company captures.
+    if (/^(us|our\s+team|this\s+role|this\s+position|the\s+company)$/i.test(candidate)) return "";
+
+    return candidate;
+  }
+
+  function renderCompanyTemplate(template, companyName) {
+    const t = String(template || "");
+    if (!t.trim()) return "";
+    const c = String(companyName || "").trim() || "your company";
+    return t
+      .replace(/<\s*company\s*name\s*>/gi, c)
+      .replace(/\{\{\s*company\s*\}\}/gi, c);
   }
 
   function splitName(fullName) {
@@ -182,6 +232,7 @@
     const ac = String(el.getAttribute("autocomplete") || "").toLowerCase();
     if (ac) {
       if (ac.includes("email")) return "email";
+      if (ac.includes("tel")) return "phone";
       if (ac.includes("given-name")) return "firstName";
       if (ac.includes("family-name")) return "lastName";
       if (ac === "name" || ac.endsWith(" name") || ac.includes("name ")) return "fullName";
@@ -197,8 +248,12 @@
     if (el instanceof HTMLInputElement) {
       const type = String(el.type || "").toLowerCase();
       if (type === "email") return "email";
+      if (type === "tel") return "phone";
     }
 
+    if (WHY_JOIN_RE.test(signal) && !WHY_JOIN_NEG_RE.test(signal)) return "whyJoin";
+    if (PHONE_RE.test(signal) && !PHONE_NEG_RE.test(signal)) return "phone";
+    if (LINKEDIN_RE.test(signal)) return "linkedin";
     if (EMAIL_RE.test(signal) && !EMAIL_NEG_RE.test(signal)) return "email";
     if (ADDRESS_RE.test(signal) && !ADDRESS_NEG_RE.test(signal)) return "address";
 
@@ -242,8 +297,22 @@
     let value = "";
 
     switch (kind) {
+      case "whyJoin": {
+        const template = String(profile.whyJoin || "").trim();
+        if (!template) break;
+        const signal = buildSignal(el);
+        const company = inferCompanyNameFromSignal(signal);
+        value = renderCompanyTemplate(template, company).trim();
+        break;
+      }
       case "email":
         value = String(profile.email || "").trim();
+        break;
+      case "phone":
+        value = String(profile.phone || "").trim();
+        break;
+      case "linkedin":
+        value = String(profile.linkedin || "").trim();
         break;
       case "fullName":
         value = String(profile.fullName || "").trim();
