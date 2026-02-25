@@ -9,6 +9,7 @@
     linkedin: "",
     address: "",
     whyJoin: "",
+    salaryExpectations: "",
     updatedAt: null
   };
 
@@ -49,6 +50,8 @@
       linkedin: typeof p.linkedin === "string" ? p.linkedin : "",
       address: typeof p.address === "string" ? p.address : "",
       whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
+      salaryExpectations:
+        typeof p.salaryExpectations === "string" ? p.salaryExpectations : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -77,6 +80,8 @@
     const address = /** @type {any} */ (byId("address"));
     /** @type {HTMLTextAreaElement} */
     const whyJoin = /** @type {any} */ (byId("whyJoin"));
+    /** @type {HTMLInputElement} */
+    const salaryExpectations = /** @type {any} */ (byId("salaryExpectations"));
 
     fullName.value = profile.fullName;
     email.value = profile.email;
@@ -84,6 +89,7 @@
     linkedin.value = profile.linkedin;
     address.value = profile.address;
     whyJoin.value = profile.whyJoin;
+    salaryExpectations.value = profile.salaryExpectations;
   }
 
   function isProbablyUrl(url) {
@@ -110,6 +116,8 @@
     const addressEl = /** @type {any} */ (byId("address"));
     /** @type {HTMLTextAreaElement} */
     const whyJoinEl = /** @type {any} */ (byId("whyJoin"));
+    /** @type {HTMLInputElement} */
+    const salaryExpectationsEl = /** @type {any} */ (byId("salaryExpectations"));
 
     const profile = {
       fullName: fullNameEl.value.trim(),
@@ -118,6 +126,7 @@
       linkedin: linkedinEl.value.trim(),
       address: addressEl.value.trim(),
       whyJoin: whyJoinEl.value.trim(),
+      salaryExpectations: salaryExpectationsEl.value.trim(),
       updatedAt: Date.now()
     };
 

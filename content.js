@@ -9,6 +9,7 @@
     linkedin: "",
     address: "",
     whyJoin: "",
+    salaryExpectations: "",
     updatedAt: null
   };
 
@@ -24,6 +25,11 @@
   const WHY_JOIN_RE =
     /\b(why\s+(would|do)\s+you\s+(want|like)\s+to\s+(join|work(\s+at|\s+for)?)|why\s+(this|our)\s+company|why\s+are\s+you\s+interested\s+in)\b/i;
   const WHY_JOIN_NEG_RE = /\b(why\s+did\s+you\s+leave|reason\s+for\s+leaving|gap|quit)\b/i;
+
+  const SALARY_EXPECTATIONS_RE =
+    /\b(salary\s*expectations?|expected\s*(salary|compensation|pay)|desired\s*(salary|compensation|pay)|compensation\s*expectations?|pay\s*expectations?)\b/i;
+  const SALARY_NEG_RE =
+    /\b(salary\s*history|current\s*salary|previous\s*salary|prior\s*salary|salary\s*last|last\s*salary|past\s*salary)\b/i;
 
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
   const FIRST_AND_LAST_RE =
@@ -52,6 +58,8 @@
       linkedin: typeof p.linkedin === "string" ? p.linkedin : "",
       address: typeof p.address === "string" ? p.address : "",
       whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
+      salaryExpectations:
+        typeof p.salaryExpectations === "string" ? p.salaryExpectations : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -64,7 +72,8 @@
         String(profile.phone || "").trim() ||
         String(profile.linkedin || "").trim() ||
         String(profile.address || "").trim() ||
-        String(profile.whyJoin || "").trim()
+        String(profile.whyJoin || "").trim() ||
+        String(profile.salaryExpectations || "").trim()
     );
   }
 
@@ -130,10 +139,26 @@
   }
 
   function shouldConsiderElement(el) {
-    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) {
-      return false;
+    const isNative =
+      el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+    const isEditableBox =
+      !isNative &&
+      el instanceof HTMLElement &&
+      ((el.getAttribute("role") || "").toLowerCase() === "textbox" ||
+        (el.getAttribute("contenteditable") || "").toLowerCase() === "true" ||
+        el.isContentEditable);
+
+    if (!isNative && !isEditableBox) return false;
+
+    if (isNative) {
+      if (el.disabled || el.readOnly) return false;
+    } else {
+      const ariaDisabled = (el.getAttribute("aria-disabled") || "").toLowerCase();
+      if (ariaDisabled === "true") return false;
+      const ce = (el.getAttribute("contenteditable") || "").toLowerCase();
+      if (ce === "false") return false;
     }
-    if (el.disabled || el.readOnly) return false;
+
     if (!isVisible(el)) return false;
 
     if (el instanceof HTMLInputElement) {
@@ -204,6 +229,116 @@
     return chunks.join(" ").trim();
   }
 
+  function collapseText(s) {
+    return String(s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function textFromNode(node) {
+    if (!node) return "";
+    return collapseText(node.textContent || "").slice(0, 400);
+  }
+
+  function countFormControls(container) {
+    if (!container) return 0;
+    try {
+      return container.querySelectorAll(
+        "input, textarea, select, [role='textbox'], [contenteditable='true'], [contenteditable='']"
+      ).length;
+    } catch {
+      return 0;
+    }
+  }
+
+  // Many job application forms render the "question" as plain text near the field
+  // without wiring it up to a <label>/<aria-label>. Grab nearby prompt text as
+  // an additional signal for classification.
+  function getNearbyPromptText(el) {
+    const texts = [];
+    const add = (node) => {
+      const t = textFromNode(node);
+      if (t) texts.push(t);
+    };
+
+    const parent = el.parentElement;
+    if (!parent) return "";
+
+    // Previous siblings often contain the prompt/question.
+    let sib = el.previousElementSibling;
+    for (let i = 0; i < 3 && sib; i++) {
+      // Stop if we crossed into another field's container.
+      if (
+        sib.querySelector &&
+        sib.querySelector(
+          "input, textarea, select, [role='textbox'], [contenteditable='true'], [contenteditable='']"
+        )
+      ) {
+        break;
+      }
+      add(sib);
+      sib = sib.previousElementSibling;
+    }
+
+    // If the label/prompt is placed as a sibling of the parent (common in grid layouts),
+    // collect from parent's previous siblings too.
+    let ps = parent.previousElementSibling;
+    for (let i = 0; i < 2 && ps; i++) {
+      if (
+        ps.querySelector &&
+        ps.querySelector(
+          "input, textarea, select, [role='textbox'], [contenteditable='true'], [contenteditable='']"
+        )
+      ) {
+        break;
+      }
+      add(ps);
+      ps = ps.previousElementSibling;
+    }
+
+    // Finally, pick prompt nodes only from a "field container" that likely belongs to this control
+    // (i.e. a container with <= 1 form control).
+    let fieldContainer = parent;
+    for (let depth = 0; depth < 5 && fieldContainer; depth++) {
+      if (countFormControls(fieldContainer) <= 1) break;
+      fieldContainer = fieldContainer.parentElement;
+    }
+
+    const promptHintRe =
+      /(\bwhy\b|\bjoin\b|\bcompany\b|\?|\bsalary\b|\bcompensation\b|\bpay\b|\bexpected\b|\bdesired\b)/i;
+
+    if (fieldContainer) {
+      const promptNodes = fieldContainer.querySelectorAll(
+        "label, legend, p, span, h1, h2, h3, h4, h5, .label, .field-label, .question, .prompt, [role='heading']"
+      );
+      let picked = 0;
+      for (const n of promptNodes) {
+        if (picked >= 4) break;
+        if (n === el || n.contains(el)) continue;
+        // Only consider nodes that appear before the field in DOM order.
+        try {
+          const pos = n.compareDocumentPosition(el);
+          if (!(pos & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+        } catch {
+          // ignore
+        }
+        const t = textFromNode(n);
+        if (!t) continue;
+        if (promptHintRe.test(t)) {
+          texts.push(t);
+          picked++;
+        }
+      }
+    }
+
+    // Fieldset legends frequently hold the question.
+    const fs = el.closest("fieldset");
+    if (fs) {
+      const legend = fs.querySelector("legend");
+      add(legend);
+    }
+
+    return collapseText(texts.join(" ")).slice(0, 800);
+  }
+
   function buildSignal(el) {
     const parts = [];
     const push = (v) => {
@@ -218,6 +353,7 @@
     push(el.getAttribute("aria-label") || "");
     push(getAriaLabelledbyText(el));
     push(getLabelText(el));
+    push(getNearbyPromptText(el));
     push(el.getAttribute("autocomplete") || "");
 
     for (const a of ["data-testid", "data-test", "data-qa", "data-cy"]) {
@@ -252,6 +388,9 @@
     }
 
     if (WHY_JOIN_RE.test(signal) && !WHY_JOIN_NEG_RE.test(signal)) return "whyJoin";
+    if (SALARY_EXPECTATIONS_RE.test(signal) && !SALARY_NEG_RE.test(signal)) {
+      return "salaryExpectations";
+    }
     if (PHONE_RE.test(signal) && !PHONE_NEG_RE.test(signal)) return "phone";
     if (LINKEDIN_RE.test(signal)) return "linkedin";
     if (EMAIL_RE.test(signal) && !EMAIL_NEG_RE.test(signal)) return "email";
@@ -270,8 +409,18 @@
     return null;
   }
 
+  function getCurrentValue(el) {
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      return String(el.value || "");
+    }
+    if (el instanceof HTMLElement) {
+      return String(el.textContent || "");
+    }
+    return "";
+  }
+
   function isEmptyValue(el) {
-    return !String(el.value || "").trim();
+    return !getCurrentValue(el).trim();
   }
 
   function setNativeValue(el, value) {
@@ -284,9 +433,59 @@
     else el.value = value;
   }
 
-  function dispatchFrameworkEvents(el) {
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.dispatchEvent(new Event("change", { bubbles: true }));
+  function dispatchFrameworkEvents(el, { valueForInputEvent = "" } = {}) {
+    // Some frameworks react better if the element is focused.
+    try {
+      if (typeof el.focus === "function") el.focus({ preventScroll: true });
+    } catch {
+      try {
+        if (typeof el.focus === "function") el.focus();
+      } catch {
+        // ignore
+      }
+    }
+
+    // Prefer a real InputEvent when supported.
+    try {
+      if (typeof window.InputEvent === "function") {
+        el.dispatchEvent(
+          new InputEvent("input", {
+            bubbles: true,
+            cancelable: true,
+            data: valueForInputEvent || null,
+            inputType: "insertText"
+          })
+        );
+      }
+    } catch {
+      // ignore
+    }
+
+    // Always dispatch standard events as well.
+    try {
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch {
+      // ignore
+    }
+
+    // Some forms validate on blur.
+    try {
+      if (typeof el.blur === "function") el.blur();
+    } catch {
+      // ignore
+    }
+  }
+
+  function setEditableValue(el, value) {
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      setNativeValue(el, value);
+      return;
+    }
+    if (el instanceof HTMLElement) {
+      el.textContent = value;
+      return;
+    }
   }
 
   function fillElement(el, kind, profile) {
@@ -305,6 +504,9 @@
         value = renderCompanyTemplate(template, company).trim();
         break;
       }
+      case "salaryExpectations":
+        value = String(profile.salaryExpectations || "").trim();
+        break;
       case "email":
         value = String(profile.email || "").trim();
         break;
@@ -333,13 +535,17 @@
     if (!value) return false;
 
     try {
-      setNativeValue(el, value);
-      dispatchFrameworkEvents(el);
+      setEditableValue(el, value);
+      dispatchFrameworkEvents(el, { valueForInputEvent: value });
       return true;
     } catch {
       try {
-        el.value = value;
-        dispatchFrameworkEvents(el);
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          el.value = value;
+        } else if (el instanceof HTMLElement) {
+          el.textContent = value;
+        }
+        dispatchFrameworkEvents(el, { valueForInputEvent: value });
         return true;
       } catch {
         return false;
@@ -351,7 +557,9 @@
     const profile = cachedProfile;
     if (!hasAnyData(profile)) return;
 
-    const fields = root.querySelectorAll("input, textarea");
+    const fields = root.querySelectorAll(
+      "input, textarea, [contenteditable='true'], [contenteditable=''], [role='textbox']"
+    );
     for (const el of fields) {
       if (!shouldConsiderElement(el)) continue;
       const signal = buildSignal(el);
