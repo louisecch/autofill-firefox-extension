@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Custom Autofill (Name/Email/Address)",
+  "version": "1.0.0",
+  "description": "Autofill Name, Email, and Address from your saved profile data.",
+  "permissions": ["storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "custom-autofill@example.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}

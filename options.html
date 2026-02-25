@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Autofill Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <h1>Autofill profile</h1>
+          <p class="subtle">
+            Saved locally in your browser. The extension will autofill matching
+            form fields on page load (and on SPA navigation).
+          </p>
+        </div>
+      </header>
+
+      <section class="card" aria-labelledby="profile-title">
+        <h2 id="profile-title">Profile data</h2>
+
+        <form id="profileForm" class="form" autocomplete="off" novalidate>
+          <div class="field">
+            <label for="fullName">Name</label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              placeholder="e.g. Jane Doe"
+              autocomplete="name"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Used for fields like <code>name</code>, <code>fullName</code>,
+              <code>firstName</code>, <code>lastName</code>.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              inputmode="email"
+              placeholder="e.g. jane@example.com"
+              autocomplete="email"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea
+              id="address"
+              name="address"
+              rows="4"
+              placeholder="Street address (and optionally unit, city, etc.)"
+              autocomplete="street-address"
+              spellcheck="false"
+            ></textarea>
+            <p class="help subtle">
+              Targets fields like <code>address</code>, <code>street</code>,
+              <code>address1</code>, and <code>streetAddress</code>.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button id="saveBtn" type="submit" class="btn primary">
+              Save
+            </button>
+            <button id="clearBtn" type="button" class="btn">
+              Clear saved data
+            </button>
+            <span id="status" class="status" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="notes-title">
+        <h2 id="notes-title">Notes</h2>
+        <ul class="notes subtle">
+          <li>By default, only <strong>empty</strong> fields are filled.</li>
+          <li>
+            For React/Vue apps, the extension simulates <code>input</code> and
+            <code>change</code> events so the UI state updates properly.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="options.js" defer></script>
+  </body>
+</html>
