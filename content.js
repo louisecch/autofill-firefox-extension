@@ -14,6 +14,8 @@
   const EMAIL_NEG_RE = /\b(newsletter|subscribe|subscription)\b/i;
 
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
+  const FIRST_AND_LAST_RE =
+    /\b(first\s*(and|&)\s*last\s*name|first\s*&\s*last|first\s+last\s+name)\b/i;
   const FIRSTNAME_RE = /\b(first\s*name|given\s*name|forename)\b/i;
   const LASTNAME_RE = /\b(last\s*name|family\s*name|surname)\b/i;
   const NAME_RE = /\bname\b/i;
@@ -201,6 +203,8 @@
     if (ADDRESS_RE.test(signal) && !ADDRESS_NEG_RE.test(signal)) return "address";
 
     if (NAME_NEG_RE.test(signal)) return null;
+    if (FIRST_AND_LAST_RE.test(signal)) return "fullName";
+    if (FIRSTNAME_RE.test(signal) && LASTNAME_RE.test(signal)) return "fullName";
     if (FIRSTNAME_RE.test(signal)) return "firstName";
     if (LASTNAME_RE.test(signal)) return "lastName";
     if (FULLNAME_RE.test(signal)) return "fullName";
