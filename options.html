@@ -133,6 +133,51 @@
             </p>
           </div>
 
+          <div class="field">
+            <label for="rightToWorkUK">Permanent right to work in the UK</label>
+            <select id="rightToWorkUK" name="rightToWorkUK">
+              <option value="">— Select —</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+            <p class="help subtle">
+              Autofills prompts like “right to work in the UK”, “eligible to work
+              in the United Kingdom”, or “UK work authorization”.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="rightToWorkUKText">Right to work in the UK (text answer)</label>
+            <textarea
+              id="rightToWorkUKText"
+              name="rightToWorkUKText"
+              rows="3"
+              placeholder='e.g. "Yes — British citizen" or "Yes — Graduate visa until 2028"'
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <p class="help subtle">
+              Used when the form asks the same question but expects a free-text
+              response. If empty, the extension falls back to “Yes/No”.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="noticePeriod">Notice period / How soon can you start?</label>
+            <input
+              id="noticePeriod"
+              name="noticePeriod"
+              type="text"
+              placeholder="e.g. Immediately / 2 weeks / 1 month"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Autofills prompts like “notice period”, “availability”, “earliest
+              start date”, or “how soon can you start?”.
+            </p>
+          </div>
+
           <div class="actions">
             <button id="saveBtn" type="submit" class="btn primary">
               Save

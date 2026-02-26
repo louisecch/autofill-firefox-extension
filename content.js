@@ -10,6 +10,9 @@
     address: "",
     whyJoin: "",
     salaryExpectations: "",
+    rightToWorkUK: "",
+    rightToWorkUKText: "",
+    noticePeriod: "",
     updatedAt: null
   };
 
@@ -30,6 +33,17 @@
     /\b(salary\s*expectations?|expected\s*(salary|compensation|pay)|desired\s*(salary|compensation|pay)|compensation\s*expectations?|pay\s*expectations?)\b/i;
   const SALARY_NEG_RE =
     /\b(salary\s*history|current\s*salary|previous\s*salary|prior\s*salary|salary\s*last|last\s*salary|past\s*salary)\b/i;
+
+  const UK_RE = /\b(uk|u\.k\.|united\s*kingdom|great\s*britain|britain|england)\b/i;
+  const RIGHT_TO_WORK_RE =
+    /\b(right\s*to\s*work|eligible\s*to\s*work|work\s*(authorization|authorisation)|work\s*permit|legal\s*right\s*to\s*work)\b/i;
+  const RIGHT_TO_WORK_NEG_RE =
+    /\b(sponsorship|visa\s*sponsorship|require\s*sponsorship|need\s*sponsorship|work\s*in\s*the\s*us|united\s*states)\b/i;
+
+  const NOTICE_PERIOD_RE =
+    /\b(notice\s*period|availability|available\s+to\s+start|when\s+can\s+you\s+start|how\s+soon\s+can\s+you\s+start|earliest\s+start|start\s+date|start\s+work)\b/i;
+  const NOTICE_PERIOD_NEG_RE =
+    /\b(project\s*start|course\s*start|start\s*time|start\s*salary)\b/i;
 
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
   const FIRST_AND_LAST_RE =
@@ -60,6 +74,12 @@
       whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
       salaryExpectations:
         typeof p.salaryExpectations === "string" ? p.salaryExpectations : "",
+      rightToWorkUK:
+        typeof p.rightToWorkUK === "string" ? p.rightToWorkUK : "",
+      rightToWorkUKText:
+        typeof p.rightToWorkUKText === "string" ? p.rightToWorkUKText : "",
+      noticePeriod:
+        typeof p.noticePeriod === "string" ? p.noticePeriod : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -73,8 +93,124 @@
         String(profile.linkedin || "").trim() ||
         String(profile.address || "").trim() ||
         String(profile.whyJoin || "").trim() ||
-        String(profile.salaryExpectations || "").trim()
+        String(profile.salaryExpectations || "").trim() ||
+        String(profile.rightToWorkUK || "").trim() ||
+        String(profile.rightToWorkUKText || "").trim() ||
+        String(profile.noticePeriod || "").trim()
     );
+  }
+
+  function normalizeYesNo(v) {
+    const s = String(v || "").trim().toLowerCase();
+    if (!s) return "";
+    if (["yes", "y", "true", "1"].includes(s)) return "yes";
+    if (["no", "n", "false", "0"].includes(s)) return "no";
+    return s;
+  }
+
+  function getOptionText(option) {
+    try {
+      return collapseText(option.textContent || "");
+    } catch {
+      return "";
+    }
+  }
+
+  function setNativeChecked(el, checked) {
+    const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "checked");
+    if (desc && typeof desc.set === "function") desc.set.call(el, checked);
+    else el.checked = checked;
+  }
+
+  function fillRightToWorkControl(el, profile) {
+    const yesNo = normalizeYesNo(profile.rightToWorkUK);
+    const textAnswer = String(profile.rightToWorkUKText || "").trim();
+
+    const signal = buildSignal(el);
+    const kindMatches =
+      UK_RE.test(signal) && RIGHT_TO_WORK_RE.test(signal) && !RIGHT_TO_WORK_NEG_RE.test(signal);
+    if (!kindMatches) return false;
+
+    // Select
+    if (el instanceof HTMLSelectElement) {
+      if (yesNo !== "yes" && yesNo !== "no") return false;
+      // Don't override if already chosen.
+      if (String(el.value || "").trim()) return false;
+
+      const wantYes = yesNo === "yes";
+      let best = null;
+      for (const opt of Array.from(el.options || [])) {
+        const val = String(opt.value || "").trim().toLowerCase();
+        const txt = getOptionText(opt).toLowerCase();
+        if (!val && !txt) continue;
+        if (wantYes && (/^y(es)?$/.test(val) || /\byes\b/.test(txt))) best = opt;
+        if (!wantYes && (/^n(o)?$/.test(val) || /\bno\b/.test(txt))) best = opt;
+      }
+
+      if (!best) return false;
+      try {
+        el.value = best.value;
+      } catch {
+        // ignore
+      }
+      dispatchFrameworkEvents(el, { valueForInputEvent: el.value });
+      return true;
+    }
+
+    // Radio
+    if (el instanceof HTMLInputElement && el.type === "radio") {
+      if (yesNo !== "yes" && yesNo !== "no") return false;
+      const name = String(el.getAttribute("name") || el.name || "").trim();
+      if (!name) return false;
+
+      const scope = el.form || el.closest("fieldset") || document;
+      const radios = Array.from(scope.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`));
+      if (radios.some((r) => r.checked)) return false;
+
+      const wantYes = yesNo === "yes";
+      const yesRe = /\b(yes|i\s*do|y)\b/i;
+      const noRe = /\b(no|i\s*do\s*not|n)\b/i;
+      const targetRe = wantYes ? yesRe : noRe;
+
+      for (const r of radios) {
+        const rSignal = buildSignal(r);
+        if (targetRe.test(rSignal)) {
+          setNativeChecked(r, true);
+          dispatchFrameworkEvents(r, { valueForInputEvent: r.value });
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Checkbox (best-effort, only if it looks like a single confirmation box)
+    if (el instanceof HTMLInputElement && el.type === "checkbox") {
+      if (el.checked) return false; // don't override
+      if (yesNo !== "yes") return false;
+      setNativeChecked(el, true);
+      dispatchFrameworkEvents(el, { valueForInputEvent: "true" });
+      return true;
+    }
+
+    // Fallback: some sites use a free-text input for this question.
+    if (
+      el instanceof HTMLInputElement ||
+      el instanceof HTMLTextAreaElement ||
+      (el instanceof HTMLElement &&
+        ((el.getAttribute("role") || "").toLowerCase() === "textbox" ||
+          (el.getAttribute("contenteditable") || "").toLowerCase() === "true" ||
+          el.isContentEditable))
+    ) {
+      if (!isEmptyValue(el)) return false;
+      const v =
+        textAnswer || (yesNo === "yes" ? "Yes" : yesNo === "no" ? "No" : "");
+      if (!v) return false;
+      setEditableValue(el, v);
+      dispatchFrameworkEvents(el, { valueForInputEvent: v });
+      return true;
+    }
+
+    return false;
   }
 
   function inferCompanyNameFromSignal(signal) {
@@ -140,7 +276,9 @@
 
   function shouldConsiderElement(el) {
     const isNative =
-      el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+      el instanceof HTMLInputElement ||
+      el instanceof HTMLTextAreaElement ||
+      el instanceof HTMLSelectElement;
     const isEditableBox =
       !isNative &&
       el instanceof HTMLElement &&
@@ -391,6 +529,12 @@
     if (SALARY_EXPECTATIONS_RE.test(signal) && !SALARY_NEG_RE.test(signal)) {
       return "salaryExpectations";
     }
+    if (NOTICE_PERIOD_RE.test(signal) && !NOTICE_PERIOD_NEG_RE.test(signal)) {
+      return "noticePeriod";
+    }
+    if (UK_RE.test(signal) && RIGHT_TO_WORK_RE.test(signal) && !RIGHT_TO_WORK_NEG_RE.test(signal)) {
+      return "rightToWorkUK";
+    }
     if (PHONE_RE.test(signal) && !PHONE_NEG_RE.test(signal)) return "phone";
     if (LINKEDIN_RE.test(signal)) return "linkedin";
     if (EMAIL_RE.test(signal) && !EMAIL_NEG_RE.test(signal)) return "email";
@@ -410,7 +554,11 @@
   }
 
   function getCurrentValue(el) {
-    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    if (
+      el instanceof HTMLInputElement ||
+      el instanceof HTMLTextAreaElement ||
+      el instanceof HTMLSelectElement
+    ) {
       return String(el.value || "");
     }
     if (el instanceof HTMLElement) {
@@ -482,6 +630,29 @@
       setNativeValue(el, value);
       return;
     }
+    if (el instanceof HTMLSelectElement) {
+      // Prefer selecting an existing option rather than forcing a value.
+      const desired = String(value || "").trim().toLowerCase();
+      if (!desired) return;
+      let best = null;
+      for (const opt of Array.from(el.options || [])) {
+        const ov = String(opt.value || "").trim().toLowerCase();
+        const ot = collapseText(opt.textContent || "").toLowerCase();
+        if (!ov && !ot) continue;
+        if (ov === desired || ot === desired) {
+          best = opt;
+          break;
+        }
+        if (!best && (ot.includes(desired) || ov.includes(desired))) best = opt;
+      }
+      if (!best) return;
+      try {
+        el.value = best.value;
+      } catch {
+        // ignore
+      }
+      return;
+    }
     if (el instanceof HTMLElement) {
       el.textContent = value;
       return;
@@ -506,6 +677,12 @@
       }
       case "salaryExpectations":
         value = String(profile.salaryExpectations || "").trim();
+        break;
+      case "noticePeriod":
+        value = String(profile.noticePeriod || "").trim();
+        break;
+      case "rightToWorkUK":
+        value = normalizeYesNo(profile.rightToWorkUK) === "yes" ? "Yes" : "No";
         break;
       case "email":
         value = String(profile.email || "").trim();
@@ -558,14 +735,28 @@
     if (!hasAnyData(profile)) return;
 
     const fields = root.querySelectorAll(
-      "input, textarea, [contenteditable='true'], [contenteditable=''], [role='textbox']"
+      "input, textarea, select, [contenteditable='true'], [contenteditable=''], [role='textbox']"
     );
     for (const el of fields) {
       if (!shouldConsiderElement(el)) continue;
       const signal = buildSignal(el);
       const kind = detectFieldKind(el, signal);
       if (!kind) continue;
+      if (kind === "rightToWorkUK") {
+        // This question can be rendered as free-text inputs too.
+        fillRightToWorkControl(el, profile);
+        continue;
+      }
       fillElement(el, kind, profile);
+    }
+
+    const ynControls = root.querySelectorAll("select, input[type='radio'], input[type='checkbox']");
+    for (const el of ynControls) {
+      try {
+        fillRightToWorkControl(el, profile);
+      } catch {
+        // ignore
+      }
     }
   }
 

@@ -10,6 +10,9 @@
     address: "",
     whyJoin: "",
     salaryExpectations: "",
+    rightToWorkUK: "",
+    rightToWorkUKText: "",
+    noticePeriod: "",
     updatedAt: null
   };
 
@@ -52,6 +55,12 @@
       whyJoin: typeof p.whyJoin === "string" ? p.whyJoin : "",
       salaryExpectations:
         typeof p.salaryExpectations === "string" ? p.salaryExpectations : "",
+      rightToWorkUK:
+        typeof p.rightToWorkUK === "string" ? p.rightToWorkUK : "",
+      rightToWorkUKText:
+        typeof p.rightToWorkUKText === "string" ? p.rightToWorkUKText : "",
+      noticePeriod:
+        typeof p.noticePeriod === "string" ? p.noticePeriod : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -82,6 +91,12 @@
     const whyJoin = /** @type {any} */ (byId("whyJoin"));
     /** @type {HTMLInputElement} */
     const salaryExpectations = /** @type {any} */ (byId("salaryExpectations"));
+    /** @type {HTMLSelectElement} */
+    const rightToWorkUK = /** @type {any} */ (byId("rightToWorkUK"));
+    /** @type {HTMLTextAreaElement} */
+    const rightToWorkUKText = /** @type {any} */ (byId("rightToWorkUKText"));
+    /** @type {HTMLInputElement} */
+    const noticePeriod = /** @type {any} */ (byId("noticePeriod"));
 
     fullName.value = profile.fullName;
     email.value = profile.email;
@@ -90,6 +105,9 @@
     address.value = profile.address;
     whyJoin.value = profile.whyJoin;
     salaryExpectations.value = profile.salaryExpectations;
+    rightToWorkUK.value = profile.rightToWorkUK;
+    rightToWorkUKText.value = profile.rightToWorkUKText;
+    noticePeriod.value = profile.noticePeriod;
   }
 
   function isProbablyUrl(url) {
@@ -118,6 +136,12 @@
     const whyJoinEl = /** @type {any} */ (byId("whyJoin"));
     /** @type {HTMLInputElement} */
     const salaryExpectationsEl = /** @type {any} */ (byId("salaryExpectations"));
+    /** @type {HTMLSelectElement} */
+    const rightToWorkUKEl = /** @type {any} */ (byId("rightToWorkUK"));
+    /** @type {HTMLTextAreaElement} */
+    const rightToWorkUKTextEl = /** @type {any} */ (byId("rightToWorkUKText"));
+    /** @type {HTMLInputElement} */
+    const noticePeriodEl = /** @type {any} */ (byId("noticePeriod"));
 
     const profile = {
       fullName: fullNameEl.value.trim(),
@@ -127,6 +151,9 @@
       address: addressEl.value.trim(),
       whyJoin: whyJoinEl.value.trim(),
       salaryExpectations: salaryExpectationsEl.value.trim(),
+      rightToWorkUK: String(rightToWorkUKEl.value || "").trim(),
+      rightToWorkUKText: rightToWorkUKTextEl.value.trim(),
+      noticePeriod: noticePeriodEl.value.trim(),
       updatedAt: Date.now()
     };
 

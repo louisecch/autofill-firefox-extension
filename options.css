@@ -131,6 +131,29 @@ textarea {
     background 150ms ease;
 }
 
+select {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text);
+  padding: 11px 12px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+@media (prefers-color-scheme: light) {
+  select {
+    background: rgba(255, 255, 255, 0.72);
+  }
+}
+
+select:focus {
+  border-color: rgba(124, 92, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.18);
+}
+
 @media (prefers-color-scheme: light) {
   input,
   textarea {
