@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "description": "Autofill Name, Email, and Address from your saved profile data.",
   "permissions": ["storage"],
+  "host_permissions": ["https://api.openai.com/*"],
+  "background": {
+    "scripts": ["background.js"]
+  },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true

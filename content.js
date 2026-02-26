@@ -19,6 +19,8 @@
     updatedAt: null
   };
 
+  const AI_SETTINGS_KEY = "aiSettings";
+
   const EMAIL_RE =
     /\b(e-?mail|email\s*address|emailaddress|contact\s*email|primary\s*email)\b/i;
   const EMAIL_NEG_RE = /\b(newsletter|subscribe|subscription)\b/i;
@@ -65,6 +67,11 @@
   const LONDON_TRAVEL_NEG_RE =
     /\b(relocate|relocation|remote\s+only|fully\s+remote|visa|sponsorship)\b/i;
 
+  const COMPANY_VALUES_RE =
+    /\b(company\s+values?|values)\b/i;
+  const VALUES_QUESTION_RE =
+    /\b(drawn\s+to\s+the\s+most|drawn\s+to|bring\s+it\s+to\s+life|bring\s+them?\s+to\s+life|how\s+will\s+you\s+bring|which\s+one\s+are\s+you\s+drawn)\b/i;
+
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
   const FIRST_AND_LAST_RE =
     /\b(first\s*(and|&)\s*last\s*name|first\s*&\s*last|first\s+last\s+name)\b/i;
@@ -82,6 +89,7 @@
   let cachedProfile = null;
   let fillTimer = null;
   let observer = null;
+  const aiAttempted = new WeakSet();
 
   function normalizeProfile(raw) {
     const p = raw && typeof raw === "object" ? raw : {};
@@ -310,6 +318,17 @@
     cachedProfile = normalizeProfile(stored);
   }
 
+  async function getAiEnabled() {
+    try {
+      const { [AI_SETTINGS_KEY]: stored } = await browser.storage.local.get({
+        [AI_SETTINGS_KEY]: { enabled: false }
+      });
+      return Boolean(stored && stored.enabled);
+    } catch {
+      return false;
+    }
+  }
+
   function isVisible(el) {
     try {
       const style = window.getComputedStyle(el);
@@ -489,7 +508,7 @@
     }
 
     const promptHintRe =
-      /(\bwhy\b|\bjoin\b|\bcompany\b|\?|\bsalary\b|\bcompensation\b|\bpay\b|\bexpected\b|\bdesired\b|\blondon\b|\btravel\b|\bcommute\b|\bpost\s*code\b|\bpostcode\b|\bstart\s*[- ]?\s*up\b|\bstartup\b|\bearly[- ]?stage\b|\bfounder\b)/i;
+      /(\bwhy\b|\bjoin\b|\bcompany\b|\?|\bsalary\b|\bcompensation\b|\bpay\b|\bexpected\b|\bdesired\b|\blondon\b|\btravel\b|\bcommute\b|\bpost\s*code\b|\bpostcode\b|\bstart\s*[- ]?\s*up\b|\bstartup\b|\bearly[- ]?stage\b|\bfounder\b|\bvalues?\b)/i;
 
     if (fieldContainer) {
       const promptNodes = fieldContainer.querySelectorAll(
@@ -550,6 +569,67 @@
     return parts.join(" ").replace(/\s+/g, " ").slice(0, 2048);
   }
 
+  function inferCompanyNameLoose(signal) {
+    const s = String(signal || "").replace(/\s+/g, " ").trim();
+    if (!s) return "";
+    const m =
+      s.match(/\b(at|for|join)\s+([A-Za-z0-9][A-Za-z0-9&.,'’\-]*(?:\s+[A-Za-z0-9][A-Za-z0-9&.,'’\-]*){0,5})\b/i) ||
+      null;
+    if (!m) return "";
+    const candidate = String(m[2] || "")
+      .trim()
+      .replace(/[?!.:,;]+$/g, "")
+      .trim();
+    if (!candidate) return "";
+    if (/^(us|our\s+team|this\s+role|this\s+position|the\s+company)$/i.test(candidate)) return "";
+    return candidate;
+  }
+
+  function extractValuesContext(el) {
+    // Best-effort: capture nearby "values" section text without grabbing the whole page.
+    const limit = 1400;
+    let n = el instanceof Element ? el : null;
+    for (let depth = 0; depth < 8 && n; depth++) {
+      const container =
+        n.closest?.("section, article, main, form, fieldset, div") || n.parentElement;
+      if (!container) break;
+      const txt = collapseText(container.textContent || "");
+      if (COMPANY_VALUES_RE.test(txt) && txt.length > 40) return txt.slice(0, limit);
+      n = container.parentElement;
+    }
+    return "";
+  }
+
+  async function maybeFillValuesWithAI(el, signal) {
+    if (aiAttempted.has(el)) return false;
+    if (!isEmptyValue(el)) return false;
+
+    const enabled = await getAiEnabled();
+    if (!enabled) return false;
+
+    const question = collapseText(getLabelText(el) || getNearbyPromptText(el) || signal).slice(0, 600);
+    const company = inferCompanyNameLoose(question) || inferCompanyNameLoose(signal);
+    const context = extractValuesContext(el);
+
+    aiAttempted.add(el);
+    const result = await browser.runtime
+      .sendMessage({
+        type: "AI_GENERATE_VALUES_ANSWER",
+        company,
+        question,
+        context
+      })
+      .catch(() => null);
+
+    const answer = result && result.ok && typeof result.answer === "string" ? result.answer : "";
+    if (!answer.trim()) return false;
+    if (!isEmptyValue(el)) return false; // user typed while waiting
+
+    setEditableValue(el, answer.trim());
+    dispatchFrameworkEvents(el, { valueForInputEvent: answer.trim() });
+    return true;
+  }
+
   function detectFieldKind(el, signal) {
     const ac = String(el.getAttribute("autocomplete") || "").toLowerCase();
     if (ac) {
@@ -574,6 +654,7 @@
     }
 
     if (WHY_JOIN_RE.test(signal) && !WHY_JOIN_NEG_RE.test(signal)) return "whyJoin";
+    if (COMPANY_VALUES_RE.test(signal) && VALUES_QUESTION_RE.test(signal)) return "aiCompanyValues";
     if (SALARY_EXPECTATIONS_RE.test(signal) && !SALARY_NEG_RE.test(signal)) {
       return "salaryExpectations";
     }
@@ -824,6 +905,11 @@
       if (kind === "rightToWorkUK") {
         // This question can be rendered as free-text inputs too.
         fillRightToWorkControl(el, profile);
+        continue;
+      }
+      if (kind === "aiCompanyValues") {
+        // async; do not block scanning
+        void maybeFillValuesWithAI(el, signal);
         continue;
       }
       fillElement(el, kind, profile);

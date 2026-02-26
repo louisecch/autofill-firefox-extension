@@ -242,6 +242,63 @@
         </form>
       </section>
 
+      <section class="card" aria-labelledby="ai-title">
+        <h2 id="ai-title">AI generation (optional)</h2>
+        <p class="subtle">
+          If enabled, the extension can generate answers for certain open-ended
+          questions (e.g. “company values”) using your AI API key. This may send
+          the question text (and nearby context) to the provider.
+        </p>
+
+        <div class="form" style="margin-top: 12px">
+          <div class="field">
+            <label class="checkbox">
+              <input id="aiEnabled" type="checkbox" />
+              <span>Enable AI generation</span>
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="openaiApiKey">OpenAI API key</label>
+            <input
+              id="openaiApiKey"
+              name="openaiApiKey"
+              type="password"
+              placeholder="sk-..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="field">
+            <label for="openaiModel">Model</label>
+            <input
+              id="openaiModel"
+              name="openaiModel"
+              type="text"
+              placeholder="gpt-4o-mini"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="field">
+            <label for="valuesPromptTemplate">Company values prompt template</label>
+            <textarea
+              id="valuesPromptTemplate"
+              name="valuesPromptTemplate"
+              rows="6"
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <p class="help subtle">
+              Available variables: <code>{{company}}</code>,
+              <code>{{question}}</code>, <code>{{context}}</code>.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="card" aria-labelledby="notes-title">
         <h2 id="notes-title">Notes</h2>
         <ul class="notes subtle">

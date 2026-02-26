@@ -113,6 +113,20 @@ h2 {
   gap: 8px;
 }
 
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
 label {
   font-weight: 600;
   color: var(--text);

@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "profileData";
+  const AI_SETTINGS_KEY = "aiSettings";
   const DEFAULT_PROFILE = {
     fullName: "",
     email: "",
@@ -17,6 +18,20 @@
     londonTravel: "",
     startupExperienceYears: "",
     updatedAt: null
+  };
+
+  const DEFAULT_AI_SETTINGS = {
+    enabled: false,
+    provider: "openai",
+    openaiApiKey: "",
+    openaiModel: "gpt-4o-mini",
+    valuesPromptTemplate:
+      "Write a concise, professional answer (3-5 sentences) to the question below. " +
+      "Tie the answer to one specific company value if provided, and make it concrete with 1 example. " +
+      "Avoid making up facts about the company. Keep it confident and friendly.\n\n" +
+      "Company: {{company}}\n" +
+      "Question: {{question}}\n" +
+      "Company values/context (may be empty):\n{{context}}\n"
   };
 
   /** @returns {HTMLFormElement} */
@@ -74,6 +89,20 @@
     };
   }
 
+  function normalizeAiSettings(raw) {
+    const s = raw && typeof raw === "object" ? raw : {};
+    return {
+      enabled: Boolean(s.enabled),
+      provider: typeof s.provider === "string" ? s.provider : "openai",
+      openaiApiKey: typeof s.openaiApiKey === "string" ? s.openaiApiKey : "",
+      openaiModel: typeof s.openaiModel === "string" ? s.openaiModel : "gpt-4o-mini",
+      valuesPromptTemplate:
+        typeof s.valuesPromptTemplate === "string"
+          ? s.valuesPromptTemplate
+          : DEFAULT_AI_SETTINGS.valuesPromptTemplate
+    };
+  }
+
   function isProbablyEmail(email) {
     const e = String(email).trim();
     if (!e) return true;
@@ -85,6 +114,11 @@
       [STORAGE_KEY]: DEFAULT_PROFILE
     });
     const profile = normalizeProfile(stored);
+
+    const { [AI_SETTINGS_KEY]: aiStored } = await browser.storage.local.get({
+      [AI_SETTINGS_KEY]: DEFAULT_AI_SETTINGS
+    });
+    const ai = normalizeAiSettings(aiStored);
 
     /** @type {HTMLInputElement} */
     const fullName = /** @type {any} */ (byId("fullName"));
@@ -112,6 +146,14 @@
     const londonTravel = /** @type {any} */ (byId("londonTravel"));
     /** @type {HTMLInputElement} */
     const startupExperienceYears = /** @type {any} */ (byId("startupExperienceYears"));
+    /** @type {HTMLInputElement} */
+    const aiEnabled = /** @type {any} */ (byId("aiEnabled"));
+    /** @type {HTMLInputElement} */
+    const openaiApiKey = /** @type {any} */ (byId("openaiApiKey"));
+    /** @type {HTMLInputElement} */
+    const openaiModel = /** @type {any} */ (byId("openaiModel"));
+    /** @type {HTMLTextAreaElement} */
+    const valuesPromptTemplate = /** @type {any} */ (byId("valuesPromptTemplate"));
 
     fullName.value = profile.fullName;
     email.value = profile.email;
@@ -126,6 +168,11 @@
     userResearchYears.value = profile.userResearchYears;
     londonTravel.value = profile.londonTravel;
     startupExperienceYears.value = profile.startupExperienceYears;
+
+    aiEnabled.checked = Boolean(ai.enabled);
+    openaiApiKey.value = ai.openaiApiKey;
+    openaiModel.value = ai.openaiModel;
+    valuesPromptTemplate.value = ai.valuesPromptTemplate;
   }
 
   function isProbablyUrl(url) {
@@ -166,6 +213,14 @@
     const londonTravelEl = /** @type {any} */ (byId("londonTravel"));
     /** @type {HTMLInputElement} */
     const startupExperienceYearsEl = /** @type {any} */ (byId("startupExperienceYears"));
+    /** @type {HTMLInputElement} */
+    const aiEnabledEl = /** @type {any} */ (byId("aiEnabled"));
+    /** @type {HTMLInputElement} */
+    const openaiApiKeyEl = /** @type {any} */ (byId("openaiApiKey"));
+    /** @type {HTMLInputElement} */
+    const openaiModelEl = /** @type {any} */ (byId("openaiModel"));
+    /** @type {HTMLTextAreaElement} */
+    const valuesPromptTemplateEl = /** @type {any} */ (byId("valuesPromptTemplate"));
 
     const profile = {
       fullName: fullNameEl.value.trim(),
@@ -184,6 +239,15 @@
       updatedAt: Date.now()
     };
 
+    const aiSettings = {
+      ...DEFAULT_AI_SETTINGS,
+      enabled: Boolean(aiEnabledEl.checked),
+      openaiApiKey: openaiApiKeyEl.value.trim(),
+      openaiModel: openaiModelEl.value.trim() || "gpt-4o-mini",
+      valuesPromptTemplate:
+        valuesPromptTemplateEl.value.trim() || DEFAULT_AI_SETTINGS.valuesPromptTemplate
+    };
+
     if (!isProbablyEmail(profile.email)) {
       setStatus("That email doesn't look valid.", { isError: true, persistMs: 2400 });
       emailEl.focus();
@@ -196,7 +260,7 @@
       return;
     }
 
-    await browser.storage.local.set({ [STORAGE_KEY]: profile });
+    await browser.storage.local.set({ [STORAGE_KEY]: profile, [AI_SETTINGS_KEY]: aiSettings });
     setStatus("Saved.");
   }
 
