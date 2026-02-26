@@ -13,6 +13,9 @@
     rightToWorkUK: "",
     rightToWorkUKText: "",
     noticePeriod: "",
+    userResearchYears: "",
+    londonTravel: "",
+    startupExperienceYears: "",
     updatedAt: null
   };
 
@@ -61,6 +64,12 @@
         typeof p.rightToWorkUKText === "string" ? p.rightToWorkUKText : "",
       noticePeriod:
         typeof p.noticePeriod === "string" ? p.noticePeriod : "",
+      userResearchYears:
+        typeof p.userResearchYears === "string" ? p.userResearchYears : "",
+      londonTravel:
+        typeof p.londonTravel === "string" ? p.londonTravel : "",
+      startupExperienceYears:
+        typeof p.startupExperienceYears === "string" ? p.startupExperienceYears : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -97,6 +106,12 @@
     const rightToWorkUKText = /** @type {any} */ (byId("rightToWorkUKText"));
     /** @type {HTMLInputElement} */
     const noticePeriod = /** @type {any} */ (byId("noticePeriod"));
+    /** @type {HTMLInputElement} */
+    const userResearchYears = /** @type {any} */ (byId("userResearchYears"));
+    /** @type {HTMLTextAreaElement} */
+    const londonTravel = /** @type {any} */ (byId("londonTravel"));
+    /** @type {HTMLInputElement} */
+    const startupExperienceYears = /** @type {any} */ (byId("startupExperienceYears"));
 
     fullName.value = profile.fullName;
     email.value = profile.email;
@@ -108,6 +123,9 @@
     rightToWorkUK.value = profile.rightToWorkUK;
     rightToWorkUKText.value = profile.rightToWorkUKText;
     noticePeriod.value = profile.noticePeriod;
+    userResearchYears.value = profile.userResearchYears;
+    londonTravel.value = profile.londonTravel;
+    startupExperienceYears.value = profile.startupExperienceYears;
   }
 
   function isProbablyUrl(url) {
@@ -142,6 +160,12 @@
     const rightToWorkUKTextEl = /** @type {any} */ (byId("rightToWorkUKText"));
     /** @type {HTMLInputElement} */
     const noticePeriodEl = /** @type {any} */ (byId("noticePeriod"));
+    /** @type {HTMLInputElement} */
+    const userResearchYearsEl = /** @type {any} */ (byId("userResearchYears"));
+    /** @type {HTMLTextAreaElement} */
+    const londonTravelEl = /** @type {any} */ (byId("londonTravel"));
+    /** @type {HTMLInputElement} */
+    const startupExperienceYearsEl = /** @type {any} */ (byId("startupExperienceYears"));
 
     const profile = {
       fullName: fullNameEl.value.trim(),
@@ -154,6 +178,9 @@
       rightToWorkUK: String(rightToWorkUKEl.value || "").trim(),
       rightToWorkUKText: rightToWorkUKTextEl.value.trim(),
       noticePeriod: noticePeriodEl.value.trim(),
+      userResearchYears: userResearchYearsEl.value.trim(),
+      londonTravel: londonTravelEl.value.trim(),
+      startupExperienceYears: startupExperienceYearsEl.value.trim(),
       updatedAt: Date.now()
     };
 

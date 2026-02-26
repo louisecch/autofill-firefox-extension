@@ -178,6 +178,58 @@
             </p>
           </div>
 
+          <div class="field">
+            <label for="userResearchYears">Years of user research experience</label>
+            <input
+              id="userResearchYears"
+              name="userResearchYears"
+              type="text"
+              inputmode="decimal"
+              placeholder="e.g. 2"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Autofills prompts like “How many years of experience do you have in
+              user research/UX research?”.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="londonTravel">Based in London + travel to &lt;post code&gt;</label>
+            <textarea
+              id="londonTravel"
+              name="londonTravel"
+              rows="3"
+              placeholder='Example: "Yes — I’m based in London and can regularly travel to &lt;post code&gt;."'
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <p class="help subtle">
+              Autofills prompts like “Are you based in London and able to
+              regularly travel/commute to [postcode]?”. Use the literal
+              <code>&lt;post code&gt;</code> and the extension will try to
+              replace it from the question text.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="startupExperienceYears">Years of start-up experience</label>
+            <input
+              id="startupExperienceYears"
+              name="startupExperienceYears"
+              type="text"
+              inputmode="decimal"
+              placeholder="e.g. 1.5"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p class="help subtle">
+              Autofills prompts like “How many years of startup/start-up
+              experience do you have?”.
+            </p>
+          </div>
+
           <div class="actions">
             <button id="saveBtn" type="submit" class="btn primary">
               Save

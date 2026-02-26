@@ -13,6 +13,9 @@
     rightToWorkUK: "",
     rightToWorkUKText: "",
     noticePeriod: "",
+    userResearchYears: "",
+    londonTravel: "",
+    startupExperienceYears: "",
     updatedAt: null
   };
 
@@ -44,6 +47,23 @@
     /\b(notice\s*period|availability|available\s+to\s+start|when\s+can\s+you\s+start|how\s+soon\s+can\s+you\s+start|earliest\s+start|start\s+date|start\s+work)\b/i;
   const NOTICE_PERIOD_NEG_RE =
     /\b(project\s*start|course\s*start|start\s*time|start\s*salary)\b/i;
+
+  const YEARS_RE = /\b(years?|yrs?)\b/i;
+  const EXPERIENCE_RE = /\b(experience|exp)\b/i;
+  const USER_RESEARCH_RE =
+    /\b(user\s*research|ux\s*research|user\s*researcher|uxr|research\s*stud(y|ies)|usability\s*research)\b/i;
+  const USER_RESEARCH_YEARS_NEG_RE =
+    /\b(competitive\s*research|market\s*research|seo|developer|coding|javascript|react|vue|design)\b/i;
+
+  const STARTUP_RE =
+    /\b(start\s*[- ]?\s*up|startup|startups|early[- ]?stage|seed|series\s*[a-d]|founder|venture[- ]?backed)\b/i;
+  const STARTUP_YEARS_NEG_RE =
+    /\b(start\s*date|start\s*time|how\s+soon\s+can\s+you\s+start|available\s+to\s+start|notice\s*period)\b/i;
+
+  const LONDON_TRAVEL_RE =
+    /\b(based\s+in\s+london|in\s+london|london\s+based|regularly\s+travel|able\s+to\s+travel|willing\s+to\s+travel|commute|able\s+to\s+commute|travel\s+to|commute\s+to|post\s*code|postcode)\b/i;
+  const LONDON_TRAVEL_NEG_RE =
+    /\b(relocate|relocation|remote\s+only|fully\s+remote|visa|sponsorship)\b/i;
 
   const FULLNAME_RE = /\b(full\s*name|your\s*name|name\s*on\s*card)\b/i;
   const FIRST_AND_LAST_RE =
@@ -80,6 +100,12 @@
         typeof p.rightToWorkUKText === "string" ? p.rightToWorkUKText : "",
       noticePeriod:
         typeof p.noticePeriod === "string" ? p.noticePeriod : "",
+      userResearchYears:
+        typeof p.userResearchYears === "string" ? p.userResearchYears : "",
+      londonTravel:
+        typeof p.londonTravel === "string" ? p.londonTravel : "",
+      startupExperienceYears:
+        typeof p.startupExperienceYears === "string" ? p.startupExperienceYears : "",
       updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
     };
   }
@@ -96,8 +122,30 @@
         String(profile.salaryExpectations || "").trim() ||
         String(profile.rightToWorkUK || "").trim() ||
         String(profile.rightToWorkUKText || "").trim() ||
-        String(profile.noticePeriod || "").trim()
+        String(profile.noticePeriod || "").trim() ||
+        String(profile.userResearchYears || "").trim() ||
+        String(profile.londonTravel || "").trim() ||
+        String(profile.startupExperienceYears || "").trim()
     );
+  }
+
+  function inferUkPostcodeFromSignal(signal) {
+    const s = String(signal || "").replace(/\s+/g, " ").trim();
+    if (!s) return "";
+
+    // UK postcode (common pattern, tolerant of spacing)
+    const m =
+      s.match(/\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b/i) ||
+      null;
+    if (!m) return "";
+    return `${String(m[1]).toUpperCase()} ${String(m[2]).toUpperCase()}`.trim();
+  }
+
+  function renderPostcodeTemplate(template, postcode) {
+    const t = String(template || "");
+    if (!t.trim()) return "";
+    const pc = String(postcode || "").trim() || "<post code>";
+    return t.replace(/<\s*post\s*code\s*>/gi, pc).replace(/<\s*postcode\s*>/gi, pc);
   }
 
   function normalizeYesNo(v) {
@@ -441,7 +489,7 @@
     }
 
     const promptHintRe =
-      /(\bwhy\b|\bjoin\b|\bcompany\b|\?|\bsalary\b|\bcompensation\b|\bpay\b|\bexpected\b|\bdesired\b)/i;
+      /(\bwhy\b|\bjoin\b|\bcompany\b|\?|\bsalary\b|\bcompensation\b|\bpay\b|\bexpected\b|\bdesired\b|\blondon\b|\btravel\b|\bcommute\b|\bpost\s*code\b|\bpostcode\b|\bstart\s*[- ]?\s*up\b|\bstartup\b|\bearly[- ]?stage\b|\bfounder\b)/i;
 
     if (fieldContainer) {
       const promptNodes = fieldContainer.querySelectorAll(
@@ -531,6 +579,23 @@
     }
     if (NOTICE_PERIOD_RE.test(signal) && !NOTICE_PERIOD_NEG_RE.test(signal)) {
       return "noticePeriod";
+    }
+    if (
+      USER_RESEARCH_RE.test(signal) &&
+      !USER_RESEARCH_YEARS_NEG_RE.test(signal) &&
+      (YEARS_RE.test(signal) || EXPERIENCE_RE.test(signal))
+    ) {
+      return "userResearchYears";
+    }
+    if (
+      STARTUP_RE.test(signal) &&
+      !STARTUP_YEARS_NEG_RE.test(signal) &&
+      (YEARS_RE.test(signal) || EXPERIENCE_RE.test(signal))
+    ) {
+      return "startupExperienceYears";
+    }
+    if (LONDON_TRAVEL_RE.test(signal) && !LONDON_TRAVEL_NEG_RE.test(signal)) {
+      return "londonTravel";
     }
     if (UK_RE.test(signal) && RIGHT_TO_WORK_RE.test(signal) && !RIGHT_TO_WORK_NEG_RE.test(signal)) {
       return "rightToWorkUK";
@@ -681,6 +746,20 @@
       case "noticePeriod":
         value = String(profile.noticePeriod || "").trim();
         break;
+      case "userResearchYears":
+        value = String(profile.userResearchYears || "").trim();
+        break;
+      case "startupExperienceYears":
+        value = String(profile.startupExperienceYears || "").trim();
+        break;
+      case "londonTravel": {
+        const template = String(profile.londonTravel || "").trim();
+        if (!template) break;
+        const signal = buildSignal(el);
+        const pc = inferUkPostcodeFromSignal(signal);
+        value = renderPostcodeTemplate(template, pc).trim();
+        break;
+      }
       case "rightToWorkUK":
         value = normalizeYesNo(profile.rightToWorkUK) === "yes" ? "Yes" : "No";
         break;
