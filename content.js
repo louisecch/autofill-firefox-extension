@@ -696,6 +696,24 @@
   }
 
   function detectFieldKind(el, signal) {
+    // --- Custom Fields Detection (Priority) ---
+    if (Array.isArray(cachedProfile.customFields)) {
+      for (const cf of cachedProfile.customFields) {
+        if (!cf.matcher || !cf.name) continue;
+        try {
+          // Escape for safety if not using regex characters, but keep it powerful
+          const re = new RegExp(cf.matcher, "i");
+          if (re.test(signal)) {
+            return { custom: true, ...cf };
+          }
+        } catch {
+          if (signal.toLowerCase().includes(cf.matcher.toLowerCase())) {
+            return { custom: true, ...cf };
+          }
+        }
+      }
+    }
+
     const ac = String(el.getAttribute("autocomplete") || "").toLowerCase();
     if (ac) {
       if (ac.includes("email")) return "email";
@@ -760,24 +778,6 @@
 
     // Very broad fallback: only consider plain "name" if it doesn't look like username/login.
     if (NAME_RE.test(signal)) return "fullName";
-
-    // --- Custom Fields Detection ---
-    if (Array.isArray(cachedProfile.customFields)) {
-      for (const cf of cachedProfile.customFields) {
-        if (!cf.matcher || !cf.name) continue;
-        try {
-          const re = new RegExp(cf.matcher, "i");
-          if (re.test(signal)) {
-            return { custom: true, ...cf };
-          }
-        } catch {
-          // If regex fails, fallback to simple includes
-          if (signal.toLowerCase().includes(cf.matcher.toLowerCase())) {
-            return { custom: true, ...cf };
-          }
-        }
-      }
-    }
 
     return null;
   }
