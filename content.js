@@ -126,6 +126,7 @@
 
   function hasAnyData(profile) {
     if (!profile) return false;
+    if (Array.isArray(profile.customFields) && profile.customFields.length > 0) return true;
     return Boolean(
       String(profile.fullName || "").trim() ||
       String(profile.email || "").trim() ||
