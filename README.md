@@ -1,4 +1,4 @@
-# <img src="icon.png" width="32" height="32" align="center" style="margin-right: 10px;"> Custom Autofill Extension
+# <img src="icon.png" width="32" height="32" align="center" style="margin-right: 10px;"> Fillzy Extension
 
 ### Quick run steps (Firefox / Zen)
 
