@@ -289,6 +289,25 @@ textarea:focus {
   margin-left: 2px;
 }
 
+.persistent-actions {
+  margin-top: 32px;
+  padding: 24px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  justify-content: center;
+  position: sticky;
+  bottom: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.btn.lg {
+  padding: 14px 32px;
+  font-size: 16px;
+}
+
 .notes {
   margin: 0;
   padding-left: 18px;
