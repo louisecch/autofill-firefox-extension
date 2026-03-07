@@ -90,7 +90,8 @@
         name: typeof f.name === "string" ? f.name : "",
         matcher: typeof f.matcher === "string" ? f.matcher : "",
         type: typeof f.type === "string" ? f.type : "text",
-        value: typeof f.value === "string" ? f.value : ""
+        value: typeof f.value === "string" ? f.value : "",
+        exclude: typeof f.exclude === "string" ? f.exclude : ""
       })) : []
     };
   }
@@ -189,7 +190,7 @@
     fields.forEach(field => addCustomFieldRow(field));
   }
 
-  function addCustomFieldRow(data = { name: "", matcher: "", type: "text", value: "" }) {
+  function addCustomFieldRow(data = { name: "", matcher: "", type: "text", value: "", exclude: "" }) {
     const container = byId("customFieldsContainer");
     const template = byId("customFieldTemplate");
     const clone = template.content.cloneNode(true);
@@ -199,6 +200,7 @@
     row.querySelector(".cf-matcher").value = data.matcher;
     row.querySelector(".cf-type").value = data.type;
     row.querySelector(".cf-value").value = data.value;
+    row.querySelector(".cf-exclude").value = data.exclude || "";
 
     row.querySelector(".cf-remove").addEventListener("click", () => {
       row.remove();
@@ -273,7 +275,8 @@
         name: row.querySelector(".cf-name").value.trim(),
         matcher: row.querySelector(".cf-matcher").value.trim(),
         type: row.querySelector(".cf-type").value,
-        value: row.querySelector(".cf-value").value.trim()
+        value: row.querySelector(".cf-value").value.trim(),
+        exclude: row.querySelector(".cf-exclude").value.trim()
       }))
     };
 

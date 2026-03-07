@@ -119,7 +119,8 @@
         name: typeof f.name === "string" ? f.name : "",
         matcher: typeof f.matcher === "string" ? f.matcher : "",
         type: typeof f.type === "string" ? f.type : "text",
-        value: typeof f.value === "string" ? f.value : ""
+        value: typeof f.value === "string" ? f.value : "",
+        exclude: typeof f.exclude === "string" ? f.exclude : ""
       })) : []
     };
   }
@@ -702,13 +703,22 @@
       for (const cf of cachedProfile.customFields) {
         if (!cf.matcher || !cf.name) continue;
         try {
-          // Escape for safety if not using regex characters, but keep it powerful
           const re = new RegExp(cf.matcher, "i");
           if (re.test(signal)) {
+            // Check exclusion pattern — if it also matches, skip this rule
+            if (cf.exclude) {
+              try {
+                const exRe = new RegExp(cf.exclude, "i");
+                if (exRe.test(signal)) continue;
+              } catch {
+                if (signal.toLowerCase().includes(cf.exclude.toLowerCase())) continue;
+              }
+            }
             return { custom: true, ...cf };
           }
         } catch {
           if (signal.toLowerCase().includes(cf.matcher.toLowerCase())) {
+            if (cf.exclude && signal.toLowerCase().includes(cf.exclude.toLowerCase())) continue;
             return { custom: true, ...cf };
           }
         }

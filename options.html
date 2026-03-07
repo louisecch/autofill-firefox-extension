@@ -202,6 +202,11 @@
                 <label>Value to Fill</label>
                 <input type="text" class="cf-value" placeholder="The value to enter" />
               </div>
+              <div class="field">
+                <label>Exclude Pattern <span class="subtle">(optional)</span></label>
+                <input type="text" class="cf-exclude" placeholder='e.g. name (skips if signal has "name")' />
+                <p class="help subtle">If this pattern also matches the field, skip it.</p>
+              </div>
             </div>
             <div class="cf-actions">
               <button type="button" class="btn danger sm cf-remove">Remove</button>
