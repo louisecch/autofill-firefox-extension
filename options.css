@@ -39,16 +39,12 @@ body {
   margin: 0;
   font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
     Noto Sans, Arial, sans-serif;
-  background: radial-gradient(
-      1100px 700px at 25% -10%,
+  background: radial-gradient(1100px 700px at 25% -10%,
       rgba(124, 92, 255, 0.22),
-      transparent 55%
-    ),
-    radial-gradient(
-      900px 600px at 95% 5%,
+      transparent 55%),
+    radial-gradient(900px 600px at 95% 5%,
       rgba(56, 189, 248, 0.18),
-      transparent 50%
-    ),
+      transparent 50%),
     var(--bg);
   color: var(--text);
 }
@@ -78,12 +74,13 @@ code {
 }
 
 .logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   background: var(--panel-2);
-  padding: 8px;
+  padding: 4px;
+  /* Reduced to make icon look larger */
   border: 1px solid var(--border);
 }
 
@@ -186,6 +183,7 @@ select:focus {
 }
 
 @media (prefers-color-scheme: light) {
+
   input,
   textarea {
     background: rgba(255, 255, 255, 0.72);
@@ -232,11 +230,9 @@ textarea:focus {
 
 .btn.primary {
   border-color: rgba(124, 92, 255, 0.35);
-  background: linear-gradient(
-    180deg,
-    rgba(124, 92, 255, 0.34),
-    rgba(124, 92, 255, 0.18)
-  );
+  background: linear-gradient(180deg,
+      rgba(124, 92, 255, 0.34),
+      rgba(124, 92, 255, 0.18));
 }
 
 .btn.primary:hover {
