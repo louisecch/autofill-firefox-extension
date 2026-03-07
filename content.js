@@ -84,7 +84,7 @@
   const ADDRESS_RE =
     /\b(address|street|street\s*address|streetaddress|addr|address\s*line|addressline|address1|address_?1)\b/i;
   const ADDRESS_NEG_RE =
-    /\b(ip\s*address|mac\s*address|email\s*address|zip|zipcode|postal|post\s*code|postcode|city|town|state|province|region|country|address\s*2|line\s*2|address_?2|addressline2|addressline\s*2|apt|apartment|suite|bldg|building|unit)\b/i;
+    /\b(ip\s*address|mac\s*address|email\s*address|zip|zipcode|postal|post\s*code|postcode|city|town|state|province|region|country|address\s*2|line\s*2|address_?2|addressline2|addressline\s*2|apt|apartment|suite|bldg|building|unit|address-level|level\s*[1-9]|locality|administrative)\b/i;
 
   let cachedProfile = null;
   let fillTimer = null;
@@ -734,8 +734,7 @@
       if (ac === "name" || ac.endsWith(" name") || ac.includes("name ")) return "fullName";
       if (
         ac.includes("street-address") ||
-        ac.includes("address-line1") ||
-        ac.includes("address-line2")
+        ac.includes("address-line1")
       ) {
         return "address";
       }
