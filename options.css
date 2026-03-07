@@ -74,14 +74,9 @@ code {
 }
 
 .logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  background: var(--panel-2);
-  padding: 4px;
-  /* Reduced to make icon look larger */
-  border: 1px solid var(--border);
+  width: 100px;
+  height: 100px;
+  /* Completely borderless and transparent container */
 }
 
 .header {
