@@ -1,4 +1,6 @@
-### Quick run steps (Firefox / Zen)
+# <img src="icon.png" width="32" height="32" align="center" style="margin-right: 10px;"> Custom Autofill Extension
+
+### Quick run steps (Firefox / Zen)
 
 - Load the folder as a temporary add-on (Firefox: about:debugging → “This Firefox” → “Load Temporary Add-on…” → select manifest.json).
 

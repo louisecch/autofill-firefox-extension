@@ -1,5 +1,13 @@
 {
   "manifest_version": 3,
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_icon": "icon.png"
+  },
   "name": "Custom Autofill (Name/Email/Address)",
   "version": "1.0.0",
   "description": "Autofill Name, Email, and Address from your saved profile data.",
