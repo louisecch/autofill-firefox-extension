@@ -112,11 +112,48 @@ h2 {
   box-shadow: var(--shadow);
 }
 
+details.card {
+  transition: all 0.3s ease;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  /* remove default triangle */
+}
+
+.card-header::-webkit-details-marker {
+  display: none;
+}
+
+.card-header::after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  /* Chevron pointing down */
+  transition: transform 0.2s ease;
+  margin-left: 12px;
+}
+
+details.card[open]>.card-header::after {
+  transform: rotate(-135deg);
+  /* Chevron pointing up */
+  margin-top: 6px;
+}
+
+/* Push chevron to the right when there's an Add Field button */
+.card-header button {
+  margin-left: auto;
+  margin-right: 12px;
 }
 
 .card-header h2 {

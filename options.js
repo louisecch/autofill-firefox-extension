@@ -334,7 +334,9 @@
       }
     });
 
-    byId("addFieldBtn").addEventListener("click", () => {
+    byId("addFieldBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       addCustomFieldRow();
     });
   }

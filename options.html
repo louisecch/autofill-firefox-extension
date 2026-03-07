@@ -22,8 +22,10 @@
     </div>
 
     <form id="profileForm" autocomplete="off" novalidate>
-      <section class="card" aria-labelledby="profile-title">
-        <h2 id="profile-title">Profile data</h2>
+      <details class="card" open>
+        <summary class="card-header">
+          <h2 id="profile-title">Profile data</h2>
+        </summary>
         <div class="form">
           <div class="field">
             <label for="fullName">Name</label>
@@ -161,14 +163,13 @@
           </div>
 
         </div>
-      </section>
-      </section>
+      </details>
 
-      <section class="card" aria-labelledby="custom-fields-title">
-        <div class="card-header">
+      <details class="card" open>
+        <summary class="card-header">
           <h2 id="custom-fields-title">Custom fields</h2>
           <button id="addFieldBtn" type="button" class="btn sm primary">Add Field</button>
-        </div>
+        </summary>
         <p class="subtle" style="margin-bottom: 16px;">
           Add your own rules for specific fields. The matcher is a <strong>simple text or regex</strong> that looks at
           the
@@ -213,10 +214,12 @@
             </div>
           </div>
         </template>
-      </section>
+      </details>
 
-      <section class="card" aria-labelledby="ai-title">
-        <h2 id="ai-title">AI generation (optional)</h2>
+      <details class="card" open>
+        <summary class="card-header">
+          <h2 id="ai-title">AI generation (optional)</h2>
+        </summary>
         <p class="subtle">
           If enabled, the extension can generate answers for certain open-ended
           questions (e.g. “company values”) using your AI API key. This may send
@@ -253,7 +256,7 @@
             </p>
           </div>
         </div>
-      </section>
+      </details>
 
       <section class="card" aria-labelledby="notes-title">
         <h2 id="notes-title">Notes</h2>
