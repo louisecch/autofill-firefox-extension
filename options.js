@@ -16,8 +16,8 @@
     noticePeriod: "",
     userResearchYears: "",
     londonTravel: "",
-    startupExperienceYears: "",
-    updatedAt: null
+    updatedAt: null,
+    customFields: [] // Array of { name, matcher, type, value }
   };
 
   const DEFAULT_AI_SETTINGS = {
@@ -85,7 +85,13 @@
         typeof p.londonTravel === "string" ? p.londonTravel : "",
       startupExperienceYears:
         typeof p.startupExperienceYears === "string" ? p.startupExperienceYears : "",
-      updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
+      updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null,
+      customFields: Array.isArray(p.customFields) ? p.customFields.map(f => ({
+        name: typeof f.name === "string" ? f.name : "",
+        matcher: typeof f.matcher === "string" ? f.matcher : "",
+        type: typeof f.type === "string" ? f.type : "text",
+        value: typeof f.value === "string" ? f.value : ""
+      })) : []
     };
   }
 
@@ -173,6 +179,32 @@
     openaiApiKey.value = ai.openaiApiKey;
     openaiModel.value = ai.openaiModel;
     valuesPromptTemplate.value = ai.valuesPromptTemplate;
+
+    renderCustomFields(profile.customFields);
+  }
+
+  function renderCustomFields(fields) {
+    const container = byId("customFieldsContainer");
+    container.innerHTML = "";
+    fields.forEach(field => addCustomFieldRow(field));
+  }
+
+  function addCustomFieldRow(data = { name: "", matcher: "", type: "text", value: "" }) {
+    const container = byId("customFieldsContainer");
+    const template = byId("customFieldTemplate");
+    const clone = template.content.cloneNode(true);
+    const row = clone.querySelector(".custom-field-row");
+
+    row.querySelector(".cf-name").value = data.name;
+    row.querySelector(".cf-matcher").value = data.matcher;
+    row.querySelector(".cf-type").value = data.type;
+    row.querySelector(".cf-value").value = data.value;
+
+    row.querySelector(".cf-remove").addEventListener("click", () => {
+      row.remove();
+    });
+
+    container.appendChild(clone);
   }
 
   function isProbablyUrl(url) {
@@ -236,7 +268,13 @@
       userResearchYears: userResearchYearsEl.value.trim(),
       londonTravel: londonTravelEl.value.trim(),
       startupExperienceYears: startupExperienceYearsEl.value.trim(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      customFields: Array.from(document.querySelectorAll(".custom-field-row")).map(row => ({
+        name: row.querySelector(".cf-name").value.trim(),
+        matcher: row.querySelector(".cf-matcher").value.trim(),
+        type: row.querySelector(".cf-type").value,
+        value: row.querySelector(".cf-value").value.trim()
+      }))
     };
 
     const aiSettings = {
@@ -291,6 +329,10 @@
         console.error(err);
         setStatus("Clear failed. Check the console.", { isError: true, persistMs: 3000 });
       }
+    });
+
+    byId("addFieldBtn").addEventListener("click", () => {
+      addCustomFieldRow();
     });
   }
 

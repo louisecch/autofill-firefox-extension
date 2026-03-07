@@ -114,7 +114,13 @@
         typeof p.londonTravel === "string" ? p.londonTravel : "",
       startupExperienceYears:
         typeof p.startupExperienceYears === "string" ? p.startupExperienceYears : "",
-      updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null
+      updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : null,
+      customFields: Array.isArray(p.customFields) ? p.customFields.map(f => ({
+        name: typeof f.name === "string" ? f.name : "",
+        matcher: typeof f.matcher === "string" ? f.matcher : "",
+        type: typeof f.type === "string" ? f.type : "text",
+        value: typeof f.value === "string" ? f.value : ""
+      })) : []
     };
   }
 
@@ -122,18 +128,18 @@
     if (!profile) return false;
     return Boolean(
       String(profile.fullName || "").trim() ||
-        String(profile.email || "").trim() ||
-        String(profile.phone || "").trim() ||
-        String(profile.linkedin || "").trim() ||
-        String(profile.address || "").trim() ||
-        String(profile.whyJoin || "").trim() ||
-        String(profile.salaryExpectations || "").trim() ||
-        String(profile.rightToWorkUK || "").trim() ||
-        String(profile.rightToWorkUKText || "").trim() ||
-        String(profile.noticePeriod || "").trim() ||
-        String(profile.userResearchYears || "").trim() ||
-        String(profile.londonTravel || "").trim() ||
-        String(profile.startupExperienceYears || "").trim()
+      String(profile.email || "").trim() ||
+      String(profile.phone || "").trim() ||
+      String(profile.linkedin || "").trim() ||
+      String(profile.address || "").trim() ||
+      String(profile.whyJoin || "").trim() ||
+      String(profile.salaryExpectations || "").trim() ||
+      String(profile.rightToWorkUK || "").trim() ||
+      String(profile.rightToWorkUKText || "").trim() ||
+      String(profile.noticePeriod || "").trim() ||
+      String(profile.userResearchYears || "").trim() ||
+      String(profile.londonTravel || "").trim() ||
+      String(profile.startupExperienceYears || "").trim()
     );
   }
 
@@ -267,6 +273,65 @@
     }
 
     return false;
+  }
+
+  function fillYesNoControl(el, value) {
+    const yesNo = normalizeYesNo(value);
+    if (yesNo !== "yes" && yesNo !== "no") return false;
+
+    // Select
+    if (el instanceof HTMLSelectElement) {
+      if (String(el.value || "").trim()) return false;
+      const wantYes = yesNo === "yes";
+      let best = null;
+      for (const opt of Array.from(el.options || [])) {
+        const val = String(opt.value || "").trim().toLowerCase();
+        const txt = getOptionText(opt).toLowerCase();
+        if (!val && !txt) continue;
+        if (wantYes && (/^y(es)?$/.test(val) || /\byes\b/.test(txt))) best = opt;
+        if (!wantYes && (/^n(o)?$/.test(val) || /\bno\b/.test(txt))) best = opt;
+      }
+      if (!best) return false;
+      el.value = best.value;
+      dispatchFrameworkEvents(el, { valueForInputEvent: el.value });
+      return true;
+    }
+
+    // Radio
+    if (el instanceof HTMLInputElement && el.type === "radio") {
+      const name = String(el.getAttribute("name") || el.name || "").trim();
+      if (!name) return false;
+      const scope = el.form || el.closest("fieldset") || document;
+      const radios = Array.from(scope.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`));
+      if (radios.some((r) => r.checked)) return false;
+
+      const wantYes = yesNo === "yes";
+      const yesRe = /\b(yes|i\s*do|y)\b/i;
+      const noRe = /\b(no|i\s*do\s*not|n)\b/i;
+      const targetRe = wantYes ? yesRe : noRe;
+
+      for (const r of radios) {
+        if (targetRe.test(buildSignal(r))) {
+          setNativeChecked(r, true);
+          dispatchFrameworkEvents(r, { valueForInputEvent: r.value });
+          return true;
+        }
+      }
+    }
+
+    // Checkbox
+    if (el instanceof HTMLInputElement && el.type === "checkbox") {
+      if (el.checked) return false;
+      if (yesNo !== "yes") return false;
+      setNativeChecked(el, true);
+      dispatchFrameworkEvents(el, { valueForInputEvent: "true" });
+      return true;
+    }
+
+    // Text box fallback
+    setEditableValue(el, yesNo === "yes" ? "Yes" : "No");
+    dispatchFrameworkEvents(el, { valueForInputEvent: el.value });
+    return true;
   }
 
   function inferCompanyNameFromSignal(signal) {
@@ -696,6 +761,24 @@
     // Very broad fallback: only consider plain "name" if it doesn't look like username/login.
     if (NAME_RE.test(signal)) return "fullName";
 
+    // --- Custom Fields Detection ---
+    if (Array.isArray(cachedProfile.customFields)) {
+      for (const cf of cachedProfile.customFields) {
+        if (!cf.matcher || !cf.name) continue;
+        try {
+          const re = new RegExp(cf.matcher, "i");
+          if (re.test(signal)) {
+            return { custom: true, ...cf };
+          }
+        } catch {
+          // If regex fails, fallback to simple includes
+          if (signal.toLowerCase().includes(cf.matcher.toLowerCase())) {
+            return { custom: true, ...cf };
+          }
+        }
+      }
+    }
+
     return null;
   }
 
@@ -866,10 +949,31 @@
         value = String(profile.address || "").trim();
         break;
       default:
-        return false;
+        // Handle custom fields
+        if (typeof kind === "object" && kind.custom) {
+          value = String(kind.value || "").trim();
+        } else {
+          return false;
+        }
     }
 
     if (!value) return false;
+
+    // Type-specific filling for custom fields
+    if (typeof kind === "object" && kind.custom) {
+      if (kind.type === "yesno") {
+        // yesno type can fill select, radio, or checkbox
+        return fillYesNoControl(el, value);
+      }
+      if (kind.type === "select") {
+        // select type handles select elements specifically
+        if (el instanceof HTMLSelectElement) {
+          setEditableValue(el, value);
+          dispatchFrameworkEvents(el, { valueForInputEvent: el.value });
+          return true;
+        }
+      }
+    }
 
     try {
       setEditableValue(el, value);

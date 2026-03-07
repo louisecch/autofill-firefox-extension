@@ -1,317 +1,274 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Autofill Options</title>
-    <link rel="stylesheet" href="options.css" />
-  </head>
-  <body>
-    <main class="container">
-        <div class="header-content">
-          <img src="icon.png" alt="Autofill Logo" class="logo" />
-          <div>
-            <h1>Autofill profile</h1>
-            <p class="subtle">
-              Saved locally in your browser. The extension will autofill matching
-              form fields on page load (and on SPA navigation).
-            </p>
-          </div>
-        </div>
 
-      <section class="card" aria-labelledby="profile-title">
-        <h2 id="profile-title">Profile data</h2>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Autofill Options</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
 
-        <form id="profileForm" class="form" autocomplete="off" novalidate>
-          <div class="field">
-            <label for="fullName">Name</label>
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              placeholder="e.g. Jane Doe"
-              autocomplete="name"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Used for fields like <code>name</code>, <code>fullName</code>,
-              <code>firstName</code>, <code>lastName</code>.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              inputmode="email"
-              placeholder="e.g. jane@example.com"
-              autocomplete="email"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="field">
-            <label for="phone">Phone</label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              inputmode="tel"
-              placeholder="e.g. +852 9123 4567"
-              autocomplete="tel"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Targets fields like <code>phone</code>, <code>mobile</code>,
-              <code>telephone</code>, <code>tel</code>.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="linkedin">LinkedIn</label>
-            <input
-              id="linkedin"
-              name="linkedin"
-              type="url"
-              inputmode="url"
-              placeholder="e.g. https://www.linkedin.com/in/your-handle"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Only fills fields that explicitly mention <code>linkedin</code>.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="address">Address</label>
-            <textarea
-              id="address"
-              name="address"
-              rows="4"
-              placeholder="Street address (and optionally unit, city, etc.)"
-              autocomplete="street-address"
-              spellcheck="false"
-            ></textarea>
-            <p class="help subtle">
-              Targets fields like <code>address</code>, <code>street</code>,
-              <code>address1</code>, and <code>streetAddress</code>.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="whyJoin">Why would you like to join &lt;company name&gt;?</label>
-            <textarea
-              id="whyJoin"
-              name="whyJoin"
-              rows="6"
-              placeholder="Example: I’m excited to join &lt;company name&gt; because…"
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
-            <p class="help subtle">
-              This will autofill “why join/why this company” questions. Use the
-              literal text <code>&lt;company name&gt;</code> in your answer and
-              the extension will try to replace it automatically.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="salaryExpectations">Salary expectations</label>
-            <input
-              id="salaryExpectations"
-              name="salaryExpectations"
-              type="text"
-              placeholder="e.g. HKD 35,000/month (negotiable)"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Autofills fields like “salary expectations”, “expected
-              compensation”, or “desired salary” (not “salary history”).
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="rightToWorkUK">Permanent right to work in the UK</label>
-            <select id="rightToWorkUK" name="rightToWorkUK">
-              <option value="">— Select —</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-            <p class="help subtle">
-              Autofills prompts like “right to work in the UK”, “eligible to work
-              in the United Kingdom”, or “UK work authorization”.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="rightToWorkUKText">Right to work in the UK (text answer)</label>
-            <textarea
-              id="rightToWorkUKText"
-              name="rightToWorkUKText"
-              rows="3"
-              placeholder='e.g. "Yes — British citizen" or "Yes — Graduate visa until 2028"'
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
-            <p class="help subtle">
-              Used when the form asks the same question but expects a free-text
-              response. If empty, the extension falls back to “Yes/No”.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="noticePeriod">Notice period / How soon can you start?</label>
-            <input
-              id="noticePeriod"
-              name="noticePeriod"
-              type="text"
-              placeholder="e.g. Immediately / 2 weeks / 1 month"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Autofills prompts like “notice period”, “availability”, “earliest
-              start date”, or “how soon can you start?”.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="userResearchYears">Years of user research experience</label>
-            <input
-              id="userResearchYears"
-              name="userResearchYears"
-              type="text"
-              inputmode="decimal"
-              placeholder="e.g. 2"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Autofills prompts like “How many years of experience do you have in
-              user research/UX research?”.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="londonTravel">Based in London + travel to &lt;post code&gt;</label>
-            <textarea
-              id="londonTravel"
-              name="londonTravel"
-              rows="3"
-              placeholder='Example: "Yes — I’m based in London and can regularly travel to &lt;post code&gt;."'
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
-            <p class="help subtle">
-              Autofills prompts like “Are you based in London and able to
-              regularly travel/commute to [postcode]?”. Use the literal
-              <code>&lt;post code&gt;</code> and the extension will try to
-              replace it from the question text.
-            </p>
-          </div>
-
-          <div class="field">
-            <label for="startupExperienceYears">Years of start-up experience</label>
-            <input
-              id="startupExperienceYears"
-              name="startupExperienceYears"
-              type="text"
-              inputmode="decimal"
-              placeholder="e.g. 1.5"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <p class="help subtle">
-              Autofills prompts like “How many years of startup/start-up
-              experience do you have?”.
-            </p>
-          </div>
-
-          <div class="actions">
-            <button id="saveBtn" type="submit" class="btn primary">
-              Save
-            </button>
-            <button id="clearBtn" type="button" class="btn">
-              Clear saved data
-            </button>
-            <span id="status" class="status" role="status" aria-live="polite"></span>
-          </div>
-        </form>
-      </section>
-
-      <section class="card" aria-labelledby="ai-title">
-        <h2 id="ai-title">AI generation (optional)</h2>
+<body>
+  <main class="container">
+    <div class="header-content">
+      <img src="icon.png" alt="Autofill Logo" class="logo" />
+      <div>
+        <h1>Autofill profile</h1>
         <p class="subtle">
-          If enabled, the extension can generate answers for certain open-ended
-          questions (e.g. “company values”) using your AI API key. This may send
-          the question text (and nearby context) to the provider.
+          Saved locally in your browser. The extension will autofill matching
+          form fields on page load (and on SPA navigation).
         </p>
+      </div>
+    </div>
 
-        <div class="form" style="margin-top: 12px">
-          <div class="field">
-            <label class="checkbox">
-              <input id="aiEnabled" type="checkbox" />
-              <span>Enable AI generation</span>
-            </label>
+    <section class="card" aria-labelledby="profile-title">
+      <h2 id="profile-title">Profile data</h2>
+
+      <form id="profileForm" class="form" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="fullName">Name</label>
+          <input id="fullName" name="fullName" type="text" placeholder="e.g. Jane Doe" autocomplete="name"
+            spellcheck="false" />
+          <p class="help subtle">
+            Used for fields like <code>name</code>, <code>fullName</code>,
+            <code>firstName</code>, <code>lastName</code>.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" inputmode="email" placeholder="e.g. jane@example.com"
+            autocomplete="email" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="e.g. +852 9123 4567" autocomplete="tel"
+            spellcheck="false" />
+          <p class="help subtle">
+            Targets fields like <code>phone</code>, <code>mobile</code>,
+            <code>telephone</code>, <code>tel</code>.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="linkedin">LinkedIn</label>
+          <input id="linkedin" name="linkedin" type="url" inputmode="url"
+            placeholder="e.g. https://www.linkedin.com/in/your-handle" autocomplete="off" spellcheck="false" />
+          <p class="help subtle">
+            Only fills fields that explicitly mention <code>linkedin</code>.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="address">Address</label>
+          <textarea id="address" name="address" rows="4" placeholder="Street address (and optionally unit, city, etc.)"
+            autocomplete="street-address" spellcheck="false"></textarea>
+          <p class="help subtle">
+            Targets fields like <code>address</code>, <code>street</code>,
+            <code>address1</code>, and <code>streetAddress</code>.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="whyJoin">Why would you like to join &lt;company name&gt;?</label>
+          <textarea id="whyJoin" name="whyJoin" rows="6"
+            placeholder="Example: I’m excited to join &lt;company name&gt; because…" autocomplete="off"
+            spellcheck="true"></textarea>
+          <p class="help subtle">
+            This will autofill “why join/why this company” questions. Use the
+            literal text <code>&lt;company name&gt;</code> in your answer and
+            the extension will try to replace it automatically.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="salaryExpectations">Salary expectations</label>
+          <input id="salaryExpectations" name="salaryExpectations" type="text"
+            placeholder="e.g. HKD 35,000/month (negotiable)" autocomplete="off" spellcheck="false" />
+          <p class="help subtle">
+            Autofills fields like “salary expectations”, “expected
+            compensation”, or “desired salary” (not “salary history”).
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="rightToWorkUK">Permanent right to work in the UK</label>
+          <select id="rightToWorkUK" name="rightToWorkUK">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+          <p class="help subtle">
+            Autofills prompts like “right to work in the UK”, “eligible to work
+            in the United Kingdom”, or “UK work authorization”.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="rightToWorkUKText">Right to work in the UK (text answer)</label>
+          <textarea id="rightToWorkUKText" name="rightToWorkUKText" rows="3"
+            placeholder='e.g. "Yes — British citizen" or "Yes — Graduate visa until 2028"' autocomplete="off"
+            spellcheck="true"></textarea>
+          <p class="help subtle">
+            Used when the form asks the same question but expects a free-text
+            response. If empty, the extension falls back to “Yes/No”.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="noticePeriod">Notice period / How soon can you start?</label>
+          <input id="noticePeriod" name="noticePeriod" type="text" placeholder="e.g. Immediately / 2 weeks / 1 month"
+            autocomplete="off" spellcheck="false" />
+          <p class="help subtle">
+            Autofills prompts like “notice period”, “availability”, “earliest
+            start date”, or “how soon can you start?”.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="userResearchYears">Years of user research experience</label>
+          <input id="userResearchYears" name="userResearchYears" type="text" inputmode="decimal" placeholder="e.g. 2"
+            autocomplete="off" spellcheck="false" />
+          <p class="help subtle">
+            Autofills prompts like “How many years of experience do you have in
+            user research/UX research?”.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="londonTravel">Based in London + travel to &lt;post code&gt;</label>
+          <textarea id="londonTravel" name="londonTravel" rows="3"
+            placeholder='Example: "Yes — I’m based in London and can regularly travel to &lt;post code&gt;."'
+            autocomplete="off" spellcheck="true"></textarea>
+          <p class="help subtle">
+            Autofills prompts like “Are you based in London and able to
+            regularly travel/commute to [postcode]?”. Use the literal
+            <code>&lt;post code&gt;</code> and the extension will try to
+            replace it from the question text.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="startupExperienceYears">Years of start-up experience</label>
+          <input id="startupExperienceYears" name="startupExperienceYears" type="text" inputmode="decimal"
+            placeholder="e.g. 1.5" autocomplete="off" spellcheck="false" />
+          <p class="help subtle">
+            Autofills prompts like “How many years of startup/start-up
+            experience do you have?”.
+          </p>
+        </div>
+
+        <div class="actions">
+          <button id="saveBtn" type="submit" class="btn primary">
+            Save
+          </button>
+          <button id="clearBtn" type="button" class="btn">
+            Clear saved data
+          </button>
+          <span id="status" class="status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="custom-fields-title">
+      <div class="card-header">
+        <h2 id="custom-fields-title">Custom fields</h2>
+        <button id="addFieldBtn" type="button" class="btn sm primary">Add Field</button>
+      </div>
+      <p class="subtle" style="margin-bottom: 16px;">
+        Add your own rules for specific fields. The matcher is a <strong>simple text or regex</strong> that looks at the
+        field's ID, name, or label.
+      </p>
+
+      <div id="customFieldsContainer" class="custom-fields-list">
+        <!-- Custom fields will be injected here -->
+      </div>
+
+      <template id="customFieldTemplate">
+        <div class="custom-field-row card shadow-sm">
+          <div class="field-grid">
+            <div class="field">
+              <label>Field Name (Reference)</label>
+              <input type="text" class="cf-name" placeholder="e.g. favoriteColor" />
+            </div>
+            <div class="field">
+              <label>Matcher (Text/Regex)</label>
+              <input type="text" class="cf-matcher" placeholder="e.g. favorite color|fav_color" />
+            </div>
+            <div class="field">
+              <label>Input Type</label>
+              <select class="cf-type">
+                <option value="text">Text / Textarea</option>
+                <option value="select">Dropdown (Select)</option>
+                <option value="yesno">Yes or No</option>
+              </select>
+            </div>
+            <div class="field cf-value-container">
+              <label>Value to Fill</label>
+              <input type="text" class="cf-value" placeholder="The value to enter" />
+            </div>
           </div>
-
-          <div class="field">
-            <label for="openaiApiKey">OpenAI API key</label>
-            <input
-              id="openaiApiKey"
-              name="openaiApiKey"
-              type="password"
-              placeholder="sk-..."
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="field">
-            <label for="openaiModel">Model</label>
-            <input
-              id="openaiModel"
-              name="openaiModel"
-              type="text"
-              placeholder="gpt-4o-mini"
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="field">
-            <label for="valuesPromptTemplate">Company values prompt template</label>
-            <textarea
-              id="valuesPromptTemplate"
-              name="valuesPromptTemplate"
-              rows="6"
-              autocomplete="off"
-              spellcheck="true"
-            ></textarea>
-            <p class="help subtle">
-              Available variables: <code>{{company}}</code>,
-              <code>{{question}}</code>, <code>{{context}}</code>.
-            </p>
+          <div class="cf-actions">
+            <button type="button" class="btn danger sm cf-remove">Remove</button>
           </div>
         </div>
-      </section>
+      </template>
+    </section>
 
-      <section class="card" aria-labelledby="notes-title">
-        <h2 id="notes-title">Notes</h2>
-        <ul class="notes subtle">
-          <li>By default, only <strong>empty</strong> fields are filled.</li>
-          <li>
-            For React/Vue apps, the extension simulates <code>input</code> and
-            <code>change</code> events so the UI state updates properly.
-          </li>
-        </ul>
-      </section>
-    </main>
+    <section class="card" aria-labelledby="ai-title">
+      <h2 id="ai-title">AI generation (optional)</h2>
+      <p class="subtle">
+        If enabled, the extension can generate answers for certain open-ended
+        questions (e.g. “company values”) using your AI API key. This may send
+        the question text (and nearby context) to the provider.
+      </p>
 
-    <script src="options.js" defer></script>
-  </body>
+      <div class="form" style="margin-top: 12px">
+        <div class="field">
+          <label class="checkbox">
+            <input id="aiEnabled" type="checkbox" />
+            <span>Enable AI generation</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="openaiApiKey">OpenAI API key</label>
+          <input id="openaiApiKey" name="openaiApiKey" type="password" placeholder="sk-..." autocomplete="off"
+            spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label for="openaiModel">Model</label>
+          <input id="openaiModel" name="openaiModel" type="text" placeholder="gpt-4o-mini" autocomplete="off"
+            spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label for="valuesPromptTemplate">Company values prompt template</label>
+          <textarea id="valuesPromptTemplate" name="valuesPromptTemplate" rows="6" autocomplete="off"
+            spellcheck="true"></textarea>
+          <p class="help subtle">
+            Available variables: <code>{{company}}</code>,
+            <code>{{question}}</code>, <code>{{context}}</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="notes-title">
+      <h2 id="notes-title">Notes</h2>
+      <ul class="notes subtle">
+        <li>By default, only <strong>empty</strong> fields are filled.</li>
+        <li>
+          For React/Vue apps, the extension simulates <code>input</code> and
+          <code>change</code> events so the UI state updates properly.
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="options.js" defer></script>
+</body>
+
 </html>

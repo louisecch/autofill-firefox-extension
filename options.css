@@ -112,6 +112,50 @@ h2 {
   box-shadow: var(--shadow);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-header h2 {
+  margin-bottom: 0;
+}
+
+.custom-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.custom-field-row {
+  position: relative;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: var(--radius-sm);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.cf-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.btn.sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
 .form {
   display: grid;
   gap: 14px;
