@@ -206,7 +206,8 @@
       row.remove();
     });
 
-    container.appendChild(clone);
+    // Add new fields to the top of the list
+    container.insertBefore(clone, container.firstChild);
   }
 
   function isProbablyUrl(url) {
