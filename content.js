@@ -82,9 +82,9 @@
     /\b(user\s*name|username|login|handle|nickname|screen\s*name|account\s*name)\b/i;
 
   const ADDRESS_RE =
-    /\b(address|street|street\s*address|streetaddress|addr|address\s*line|addressline|address1|address_?1|address2|address_?2)\b/i;
+    /\b(address|street|street\s*address|streetaddress|addr|address\s*line|addressline|address1|address_?1)\b/i;
   const ADDRESS_NEG_RE =
-    /\b(ip\s*address|mac\s*address|email\s*address|zip|zipcode|postal|post\s*code|postcode|city|town|state|province|region|country)\b/i;
+    /\b(ip\s*address|mac\s*address|email\s*address|zip|zipcode|postal|post\s*code|postcode|city|town|state|province|region|country|address\s*2|line\s*2|address_?2|addressline2|addressline\s*2|apt|apartment|suite|bldg|building|unit)\b/i;
 
   let cachedProfile = null;
   let fillTimer = null;
